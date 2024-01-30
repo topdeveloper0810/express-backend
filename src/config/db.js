@@ -8,7 +8,7 @@ async function dbConnect() {
     .connect(process.env.DATABASE_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      //   useCreateIndex: true,
+      // useCreateIndex: true,
     })
     .then(() => {
       console.log("MongoDB is Connected..");
