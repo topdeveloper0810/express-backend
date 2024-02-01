@@ -12,14 +12,14 @@ const sendVerifyCode = async (req, res) => {
         res.status(400).json({ msg: "This email is not exist." });
       } else {
         const transporter = nodemailer.createTransport({
-          // host: process.env.SMTP_HOST,
-          // port: process.env.SMTP_PORT,
-          // secure: false,
-          service: "gmail",
+          host: process.env.SMTP_HOST,
+          port: process.env.SMTP_PORT,
+          secure: false,
           auth: {
             user: process.env.SMTP_USERNAME,
             pass: process.env.SMTP_PASSWORD,
           },
+          // service: "gmail",
         });
         process.env.VERIFICATION_CODE = Math.floor(
           100000 + Math.random() * 900000
