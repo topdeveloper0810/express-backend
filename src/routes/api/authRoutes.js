@@ -1,10 +1,14 @@
-const { Router } = require("express");
-const authController = require("../../controllers/authController")
+const express = require("express");
+const authController = require("../../controllers/authController");
+const verifyCode = require("../../controllers/verifyCode");
 const requiredAuth = require("../../middlewares/requiredAuth");
 
-const router = Router();
+const router = express.Router();
 
-router.get("/free", authController.free);
-router.get("/test", requiredAuth, authController.test);
+router.post("/register", authController.register);
+router.post("/login", authController.login);
+router.post("/logout", requiredAuth, authController.logout);
+router.post("/sendcode", verifyCode.sendVerifyCode);
+router.post("/verifycode", verifyCode.verifyCode);
 
 module.exports = router;

@@ -1,9 +1,10 @@
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const passport = require("passport");
 const dotenv = require("dotenv");
 const dbConnect = require("./config/db");
-const routes = require("./routes/api")
+const routes = require("./routes/api");
 
 const app = express();
 
@@ -13,6 +14,7 @@ dbConnect();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(passport.initialize());
 
 const PORT = process.env.PORT;
 
