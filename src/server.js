@@ -17,6 +17,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(passport.initialize());
 
 const PORT = process.env.PORT;
+const HOST = process.env.HOST;
 
 app.get("/", (req, res) => {
   res.status(200).json("Server is running!");
@@ -24,6 +25,6 @@ app.get("/", (req, res) => {
 
 app.use("/api/v1", routes);
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+app.listen(PORT, HOST, () => {
+  console.log(`Server is running on port: http://${HOST}:${PORT}`);
 });
