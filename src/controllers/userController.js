@@ -16,7 +16,7 @@ const all = async (req, res) => {
   await User.find()
     .sort({ date: 1 })
     .then((users) => res.status(200).json({ success: true, data: { users } }))
-    .catch((err) => res.status(404).json({ msg: "No users found." }));
+    .catch((err) => res.status(403).json({ msg: "No users found." }));
 };
 
 module.exports = { test, me, all };

@@ -6,9 +6,9 @@ const requiredAuth = require("../../middlewares/requiredAuth");
 const router = express.Router();
 
 router.post("/register", authController.register);
+router.post("/sendcode", verifyCode.sendCode);
+router.post("/verifycode", verifyCode.verifyCode);
 router.post("/login", authController.login);
 router.post("/logout", requiredAuth, authController.logout);
-router.post("/sendcode", verifyCode.sendVerifyCode);
-router.post("/verifycode", verifyCode.verifyCode);
 
 module.exports = router;

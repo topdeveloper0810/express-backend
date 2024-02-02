@@ -21,6 +21,10 @@ const UserSchema = new Schema({
     required: true,
     default: "student",
   },
+  vCode: {
+    type: Number,
+    default: 0,
+  },
   date: {
     type: Date,
     default: Date.now,
