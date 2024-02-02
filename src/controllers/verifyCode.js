@@ -19,9 +19,9 @@ const sendCode = async (req, res) => {
           user.vCode = VERIFY_CODE;
           user
             .save()
-            .then(() => console.log({ msg: "User vCode is saved" }))
+            .then()
             .catch((error) =>
-              console.log({ msg: "User vCode error", err: error })
+              res.status(400).json({ msg: "User vCode is not saved", err: error })
             );
           const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
@@ -40,9 +40,8 @@ const sendCode = async (req, res) => {
             subject: `Your verification code is ${VERIFY_CODE}`,
             text: "code",
             html: `<h1>Verify your email address</h1>
-          <hr><h3><p>Please enter this 6-digit code to access our platform.</p></h3>
-          <h2>${VERIFY_CODE}</h2>
-          <h3><p>This code is valid for 2 minute.</p></h3>`,
+          <hr><h3>Please enter this 6-digit code to access our platform.</h3>
+          <h1>${VERIFY_CODE}</h1>`,
           };
           transporter.sendMail(mailOptions, (err, info) => {
             if (err) {
@@ -87,7 +86,7 @@ const sendCode = async (req, res) => {
 
 const verifyCode = async (req, res) => {
   const token = await req.headers.authorization.split(" ")[1];
-  const { vCode } = req.body;
+  const { vCode } = await req.body;
   if (!token) {
     return res.status(401).json({ msg: "No verify token." });
   }
@@ -96,21 +95,20 @@ const verifyCode = async (req, res) => {
       if (error) {
         return res.status(401).json({ msg: "Verify token is not valid." });
       } else {
-        if (decode.vCord == vCode) {
+        if (decode.vCode == vCode) {
           User.findById(decode._id).then((user) => {
             user.vCode = 1;
             user
               .save()
               .then(() => {
-                console.log("User vCode is 1");
-                res.status(200).json({ success: true, data: "Verify Passed." });
+                res.status(200).json({ success: true, vCode: user.vCode, data: "Verify Passed." });
               })
               .catch((error) => console.log("User vCode => 1 : ", error));
           });
         } else {
           res
             .status(400)
-            .json({msg: "The code is incorrect, try again" });
+            .json({vCode, msg: "The code is incorrect, try again" });
         }
       }
     });
@@ -118,7 +116,7 @@ const verifyCode = async (req, res) => {
     console.log(error);
     res
       .status(500)
-      .json({msg: "Verify code error.", err: error });
+      .json({ msg: "Verify code error.", err: error });
   }
 };
 
