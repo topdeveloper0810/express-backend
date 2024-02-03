@@ -85,8 +85,8 @@ const sendCode = async (req, res) => {
 };
 
 const verifyCode = async (req, res) => {
-  const token = await req.headers.authorization.split(" ")[1];
-  const { vCode } = await req.body;
+  const token = req.headers.authorization.split(' ')[1];
+  const { vCode } = req.body;
   if (!token) {
     return res.status(401).json({ msg: "No verify token." });
   }
