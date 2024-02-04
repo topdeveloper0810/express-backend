@@ -73,7 +73,7 @@ const login = async (req, res) => {
           secretOrKey,
           { expiresIn: expiresIn },
           (err, token) => {
-            res.json({
+            res.status(200).json({
               success: true,
               data: { user, token: "Bearer " + token },
             });

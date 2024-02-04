@@ -45,7 +45,6 @@ const sendCode = async (req, res) => {
           };
           transporter.sendMail(mailOptions, (err, info) => {
             if (err) {
-              console.log(err);
               res.status(500).json({ msg: err });
             } else {
               // create JWT payload
@@ -77,7 +76,6 @@ const sendCode = async (req, res) => {
           .json({ msg: "User verify error", err: error })
       );
   } catch (error) {
-    console.log(error);
     res
       .status(500)
       .json({ msg: "Send verify Code error", err: error });
@@ -113,7 +111,6 @@ const verifyCode = async (req, res) => {
       }
     });
   } catch (error) {
-    console.log(error);
     res
       .status(500)
       .json({ msg: "Verify code error.", err: error });

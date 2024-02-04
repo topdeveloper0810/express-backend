@@ -5,14 +5,14 @@ module.exports = async (req, res, next) => {
     try {
         await User.findOne({ email }).then((user) => {
             if (!user) {
-                return res.status(401).json({ msg: "No user." });
+                return res.status(400).json({ msg: "No user." });
             } else if (user.vCode == 1) {
                 next();
             } else {
-                return res.status(400).json({ msg: "No verified, try verify code" });
+                return res.status(401).json({ msg: "No verified, try verify code" });
             }
         });
     } catch (error) {
-        await res.status(401).json({ msg: "Server error, login", error: error });
+        await res.status(401).json({ msg: "Verify error, login", error: error });
     }
 };

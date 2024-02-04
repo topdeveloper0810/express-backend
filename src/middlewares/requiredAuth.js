@@ -27,7 +27,6 @@ module.exports = async (req, res, next) => {
       }
     });
   } catch (error) {
-    console.error("Something wrong with auth middleware.");
-    await res.status(500).json({ msg: error });
+    console.error("Something wrong with auth middleware.", error);
   }
 };
