@@ -23,13 +23,13 @@ const QuestionSchema = new Schema({
     type: Date,
     default: Date.now,
   },
-  answer: [
+  answers: [
     {
       student: {
         type: Schema.Types.ObjectId,
         ref: "users",
       },
-      comment: {
+      answer: {
         type: String,
         required: true,
       },
@@ -45,4 +45,4 @@ const QuestionSchema = new Schema({
   ],
 });
 
-module.exports = Question = mongoose.model("question", QuestionSchema);
+module.exports = Question = mongoose.model("questions", QuestionSchema);

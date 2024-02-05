@@ -16,8 +16,23 @@ const UserSchema = new Schema({
     type: String,
     required: [true, "Password is required!"],
   },
+  school: {
+    type: Schema.Types.ObjectId,
+    ref: "schools",
+  },
+  level: {
+    type: String,
+    enum: ["beginner", "intermediate", "advanced"],
+  },
+  correctAnswers: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "questions",
+    },
+  ],
   role: {
     type: String,
+    enum: ["admin", "student"],
     default: "student",
   },
   vCode: {
