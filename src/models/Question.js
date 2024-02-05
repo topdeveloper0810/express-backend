@@ -2,32 +2,45 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const QuestionSchema = new Schema({
-  user: {
+  createdBy: {
     type: Schema.Types.ObjectId,
     ref: "users",
   },
-  question: {
+  topic: {
     type: String,
     required: true,
   },
+  content: {
+    type: String,
+    required: true,
+  },
+  level: {
+    type: String,
+    enum: ["beginner", "intermediate", "advanced"],
+    default: "beginner",
+  },
+  date: {
+    type: Date,
+    default: Date.now,
+  },
   answer: [
     {
-      user: {
+      student: {
         type: Schema.Types.ObjectId,
         ref: "users",
       },
-      comment:{
+      comment: {
         type: String,
         required: true,
       },
-      true:{
+      isCorrect: {
         type: Boolean,
-        required: true,
+        required: false,
       },
-      date:{
+      date: {
         type: Date,
-        default: Date.now
-      }
+        default: Date.now,
+      },
     },
   ],
 });
