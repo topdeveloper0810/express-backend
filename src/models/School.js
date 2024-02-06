@@ -12,7 +12,7 @@ const SchoolSchema = new Schema({
             ref: "users",
         },
     ],
-    correctStudents: {
+    correctAnsNum: {
         type: Number,
         default: 0,
     },

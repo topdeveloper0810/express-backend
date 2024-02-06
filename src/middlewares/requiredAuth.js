@@ -7,7 +7,7 @@ dotenv.config();
 const secretOrKey = process.env.JWT_ACCESS_TOKEN_SECRET_PRIVATE;
 
 module.exports = async (req, res, next) => {
-  const token = await req.headers.Authorization.split(" ")[1];
+  const token = await req.headers.authorization.split(" ")[1];
   if (!token) {
     return res.status(401).json({ msg: "No token, authentication denied." });
   }

@@ -6,11 +6,15 @@ const QuestionSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "users",
   },
-  topic: {
+  title: {
     type: String,
     required: true,
   },
-  content: {
+  question: {
+    type: String,
+    required: true,
+  },
+  topic: {
     type: String,
     required: true,
   },
@@ -19,7 +23,7 @@ const QuestionSchema = new Schema({
     enum: ["beginner", "intermediate", "advanced"],
     default: "beginner",
   },
-  date: {
+  questionDate: {
     type: Date,
     default: Date.now,
   },
@@ -35,9 +39,9 @@ const QuestionSchema = new Schema({
       },
       isCorrect: {
         type: Boolean,
-        required: false,
+        default: false,
       },
-      date: {
+      answerDate: {
         type: Date,
         default: Date.now,
       },

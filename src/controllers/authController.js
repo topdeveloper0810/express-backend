@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const User = require("../models/User");
+const School = require("../models/School");
 
 dotenv.config();
 const secretOrKey = process.env.JWT_ACCESS_TOKEN_SECRET_PRIVATE;
@@ -11,11 +12,11 @@ const test = async (req, res) => {
   await res.status(200).json({ msg: "Auth is running." });
 };
 
-// @route   POST api/users/register
+// @route   POST api/auth/register
 // @desc    Register a user
 // @access  Public
 const register = async (req, res) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, school, level, role } = req.body;
 
   await User.findOne({ email }).then((user) => {
     if (user) {
@@ -28,6 +29,8 @@ const register = async (req, res) => {
         name: name,
         email: email,
         password: password,
+        // school: school,
+        level: level,
         role: role,
       });
       bcrypt.genSalt(10, (err, salt) => {
@@ -36,9 +39,22 @@ const register = async (req, res) => {
           newUser.password = hash;
           newUser
             .save()
-            .then((user) =>
+            .then((user) => {
+              if (user.role === "student") {
+                School.findOne({ schoolName: school }).then((school) => {
+                  school.students.unshift(user._id);
+                  user.school = school._id;
+                  user.save();
+                  school.save();
+                  // .then((school) =>
+                  //   res
+                  //     .status(200)
+                  //     .json({ success: true, data: { user, school } })
+                  // );
+                })
+              }
               res.status(200).json({ success: true, data: { user } })
-            )
+            })
             .catch((err) => console.log(err));
         });
       });

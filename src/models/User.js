@@ -19,12 +19,18 @@ const UserSchema = new Schema({
   school: {
     type: Schema.Types.ObjectId,
     ref: "schools",
+    required: () => {
+      return this.role === "student";
+    },
   },
   level: {
     type: String,
     enum: ["beginner", "intermediate", "advanced"],
+    required: () => {
+      return this.role === "student";
+    },
   },
-  correctAnswers: [
+  correctQuestions: [
     {
       type: Schema.Types.ObjectId,
       ref: "questions",

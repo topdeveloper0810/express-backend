@@ -8,7 +8,7 @@ dotenv.config();
 const secretOrKey = process.env.JWT_ACCESS_TOKEN_SECRET_PRIVATE;
 
 const sendCode = async (req, res) => {
-  const { email } = req.body;
+  const email = req.body.email;
   try {
     await User.findOne({ email: email })
       .then((user) => {
@@ -84,7 +84,7 @@ const sendCode = async (req, res) => {
 
 const verifyCode = async (req, res) => {
   const token = req.headers.authorization.split(' ')[1];
-  const { vCode } = req.body;
+  const vCode = req.body.vCode;
   if (!token) {
     return res.status(401).json({ msg: "No verify token." });
   }
