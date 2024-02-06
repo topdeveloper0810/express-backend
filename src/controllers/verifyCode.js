@@ -101,7 +101,7 @@ const verifyCode = async (req, res) => {
               .then(() => {
                 res.status(200).json({ success: true, vCode: user.vCode, data: "Verify Passed." });
               })
-              .catch((error) => console.log("User vCode => 1 : ", error));
+              .catch((error) => res.status(500).json({msg: "vCode <= One error."}));
           });
         } else {
           res

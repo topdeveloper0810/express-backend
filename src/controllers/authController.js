@@ -42,7 +42,7 @@ const register = async (req, res) => {
             .then((user) => {
               if (user.role === "student") {
                 School.findOne({ schoolName: school }).then((school) => {
-                  school.students.unshift(user._id);
+                  school.students.push(user._id);
                   user.school = school._id;
                   user.save();
                   school.save();
@@ -55,7 +55,7 @@ const register = async (req, res) => {
               }
               res.status(200).json({ success: true, data: { user } })
             })
-            .catch((err) => console.log(err));
+            .catch((err) => res.status(500).json({msg:"User save error."}));
         });
       });
     }

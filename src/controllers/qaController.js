@@ -34,21 +34,34 @@ const addQues = async (req, res) => {
 const deleteQues = async (req, res) => {
   try {
     const deleteques_id = req.params.deleteques_id;
-    await Question.findById(deleteques_id)
-      .then((deletedques) => {
-        if (!deletedques) {
-          return res.status(404).json({ msg: "Question doesn't exist." });
+    await Question.findByIdAndDelete(deleteques_id)
+      .then((deletedQuestion) => {
+        if (!deletedQuestion) {
+          return res.status(404).json({ msg: "Question not found." });
         } else {
-          const correctQuestions = User.find({correctQuestions: deleteques_id})
-          console.log(correctQuestions);
+          User.find({ correctQuestions: deleteques_id }).then(
+            (usersDeletedQuestion) => {
+              usersDeletedQuestion.map((user) => {
+                user.correctQuestions = user.correctQuestions.filter(
+                  (ques_id) => ques_id.toString() !== deleteques_id
+                );
+                user.save();
+                School.findById(user.school).then((school) => {
+                  school.correctAnsNum -= 1;
+                  school.save();
+                });
+                Question.find().then((questions) =>
+                  res.status(200).json({ success: true, data: { questions } })
+                );
+              });
+            }
+          );
         }
       })
       .catch((err) => {
-        console.log(err);
         res.status(500).json({ msg: "Question delete error.", err: err });
       });
   } catch (error) {
-    console.log(error);
     res
       .status(500)
       .json({ msg: "Server error(Delete Question).", error: error });
@@ -138,7 +151,6 @@ const stuQuesAns = async (req, res) => {
         .json({ msg: "No answered questions found for the student." });
     }
   } catch (error) {
-    console.log({ msg: "Server error(Question and Answer).", error: error });
     res
       .status(500)
       .json({ msg: "Server error(Question and Answer).", error: error });
@@ -167,7 +179,6 @@ const trueAns = async (req, res) => {
       res.status(404).json({ msg: "Answer not found." });
     }
   } catch (error) {
-    console.log(error);
     res.status(500).json({ msg: "Server error (True Answer)." });
   }
 };
