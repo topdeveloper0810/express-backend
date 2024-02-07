@@ -33,7 +33,7 @@ const rankUser = async (req, res) => {
     await School.findOne({ students: req.user._id })
       .populate("students", ["name", "level", "correctQuestions"])
       .then((userSchool) => {
-        const students = userSchool.students;
+        const students = userSchool.students;        
         res.status(200).json({ success: true, data: { students } });
       })
       .catch((err) =>

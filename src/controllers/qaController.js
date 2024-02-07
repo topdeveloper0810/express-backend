@@ -22,11 +22,13 @@ const addQues = async (req, res) => {
     await newQuestion
       .save()
       .then(() =>
-        Question.find().then(
-          (questions) =>
-            res.status(200).json({ success: true, data: { questions } })
-          // res.status(200).json({ success: true })
-        )
+        Question.find()
+          .sort({ questionDate: -1 })
+          .then(
+            (questions) =>
+              res.status(200).json({ success: true, data: { questions } })
+            // res.status(200).json({ success: true })
+          )
       )
       .catch((err) =>
         res
@@ -88,7 +90,7 @@ const deleteQues = async (req, res) => {
 const allQuesAns = async (req, res) => {
   try {
     await Question.find()
-      .sort({ date: -1 })
+      .sort({ questionDate: -1 })
       .then((questions) => {
         res.status(200).json({ success: true, data: { questions } });
       })
