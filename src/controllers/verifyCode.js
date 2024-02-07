@@ -7,6 +7,9 @@ dotenv.config();
 
 const secretOrKey = process.env.JWT_ACCESS_TOKEN_SECRET_PRIVATE;
 
+// @route   POST api/v1/auth/sendcode
+// @desc    Send verify code
+// @access  Public
 const sendCode = async (req, res) => {
   const email = req.body.email;
   try {
@@ -82,6 +85,9 @@ const sendCode = async (req, res) => {
   }
 };
 
+// @route   POST api/v1/auth/verifycode
+// @desc    Verify Code
+// @access  Public
 const verifyCode = async (req, res) => {
   const token = req.headers.authorization.split(' ')[1];
   const vCode = req.body.vCode;

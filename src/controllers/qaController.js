@@ -6,6 +6,9 @@ const test = async (req, res) => {
   res.status(200).json({ msg: "Question api is running." });
 };
 
+// @route   POST api/v1/qa/addques
+// @desc    Add Question
+// @access  Private
 const addQues = async (req, res) => {
   try {
     const { title, question, topic, level } = req.body;
@@ -31,6 +34,9 @@ const addQues = async (req, res) => {
   }
 };
 
+// @route   DELETE api/v1/qa/deleteques/:deleteques_id
+// @desc    Delete Question
+// @access  Private
 const deleteQues = async (req, res) => {
   try {
     const deleteques_id = req.params.deleteques_id;
@@ -68,6 +74,9 @@ const deleteQues = async (req, res) => {
   }
 };
 
+// @route   GET api/v1/qa/allquesans
+// @desc    GEt All Questions and Answers
+// @access  Private
 const allQuesAns = async (req, res) => {
   try {
     await Question.find()
@@ -85,6 +94,9 @@ const allQuesAns = async (req, res) => {
   }
 };
 
+// @route   POST api/v1/qa/addans/:ques_id
+// @desc    Add Answer
+// @access  Public
 const addAns = async (req, res) => {
   try {
     const stu_id = req.user._id;
@@ -118,6 +130,9 @@ const addAns = async (req, res) => {
   }
 };
 
+// @route   GET api/v1/qa/stuquesans
+// @desc    Get Question and Answer as answered.
+// @access  Public
 const stuQuesAns = async (req, res) => {
   try {
     const stu_id = req.user._id;
@@ -157,6 +172,9 @@ const stuQuesAns = async (req, res) => {
   }
 };
 
+// @route   POST api/v1/qa/trueans/:ques_id/:ans_id
+// @desc    True Answer
+// @access  Private
 const trueAns = async (req, res) => {
   try {
     const ques_id = req.params.ques_id;

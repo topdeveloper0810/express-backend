@@ -102,6 +102,9 @@ const login = async (req, res) => {
   });
 };
 
+// @route   POST api/v1/auth/logout
+// @desc    Logout a user
+// @access  Public
 const logout = async (req, res) => {
   try {
     await res

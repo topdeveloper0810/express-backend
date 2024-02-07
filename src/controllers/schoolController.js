@@ -4,6 +4,9 @@ const test = async (req, res) => {
   res.status(200).json({ msg: "School api is running." });
 };
 
+// @route   POST api/v1/school/add
+// @desc    Add Schools
+// @access  Private
 const addSchool = async (req, res) => {
   try {
     const { schoolName } = req.body;
@@ -31,6 +34,9 @@ const addSchool = async (req, res) => {
   }
 };
 
+// @route   POST api/v1/school/delete/:school_id
+// @desc    Delete school
+// @access  Private
 const deleteSchool = async (req, res) => {
   try {
     const school_id = req.params.school_id;

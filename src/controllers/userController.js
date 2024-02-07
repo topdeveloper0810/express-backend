@@ -4,6 +4,9 @@ const test = async (req, res) => {
   await res.status(200).json({ msg: "User is running" });
 };
 
+// @route   POST api/v1/user/me
+// @desc    Get user
+// @access  Public
 const me = async (req, res) => {
   const user = req.user;
   await res.status(200).json({
@@ -12,6 +15,9 @@ const me = async (req, res) => {
   });
 };
 
+// @route   POST api/v1/user/all
+// @desc    Get all user
+// @access  Private
 const all = async (req, res) => {
   await User.find()
     .sort({ date: 1 })
