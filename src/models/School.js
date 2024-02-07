@@ -2,24 +2,27 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const SchoolSchema = new Schema({
-    schoolName: {
-        type: String,
-        required: true,
+  schoolName: {
+    type: String,
+    required: true,
+  },
+  description: {
+    type: String,
+  },
+  students: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "users",
     },
-    students: [
-        {
-            type: Schema.Types.ObjectId,
-            ref: "users",
-        },
-    ],
-    correctAnsNum: {
-        type: Number,
-        default: 0,
-    },
-    date: {
-        type: Date,
-        default: Date.now,
-    },
+  ],
+  correctAnsNum: {
+    type: Number,
+    default: 0,
+  },
+  date: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 module.exports = School = mongoose.model("schools", SchoolSchema);

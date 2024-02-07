@@ -22,15 +22,21 @@ const addQues = async (req, res) => {
     await newQuestion
       .save()
       .then(() =>
-        Question.find().then((questions) =>
-          res.status(200).json({ success: true, data: { questions } })
+        Question.find().then(
+          (questions) =>
+            res.status(200).json({ success: true, data: { questions } })
+          // res.status(200).json({ success: true })
         )
       )
       .catch((err) =>
-        res.status(400).json({ msg: "New Question save error", err: err.message })
+        res
+          .status(400)
+          .json({ msg: "New Question save error", err: err.message })
       );
   } catch (error) {
-    res.status(500).json({ msg: "Server error(Add Question).", error: error.message });
+    res
+      .status(500)
+      .json({ msg: "Server error(Add Question).", error: error.message });
   }
 };
 
@@ -56,16 +62,18 @@ const deleteQues = async (req, res) => {
                   school.correctAnsNum -= 1;
                   school.save();
                 });
-                Question.find().then((questions) =>
-                  res.status(200).json({ success: true, data: { questions } })
-                );
               });
             }
+          );
+          Question.find().then((questions) =>
+            res.status(200).json({ success: true, data: { questions } })
           );
         }
       })
       .catch((err) => {
-        res.status(500).json({ msg: "Question delete error.", err: err.message });
+        res
+          .status(500)
+          .json({ msg: "Question delete error.", err: err.message });
       });
   } catch (error) {
     res
@@ -85,12 +93,15 @@ const allQuesAns = async (req, res) => {
         res.status(200).json({ success: true, data: { questions } });
       })
       .catch((err) =>
-        res.status(500).json({ msg: "Questions and Answers error.", err: err.message })
+        res
+          .status(500)
+          .json({ msg: "Questions and Answers error.", err: err.message })
       );
   } catch (error) {
-    res
-      .status(500)
-      .json({ msg: "Server error(All Question and Answer).", error: error.message });
+    res.status(500).json({
+      msg: "Server error(All Question and Answer).",
+      error: error.message,
+    });
   }
 };
 
@@ -162,7 +173,9 @@ const addAns = async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ msg: "Server error (Add answer).", error: error.message });
+    res
+      .status(500)
+      .json({ msg: "Server error (Add answer).", error: error.message });
   }
 };
 
@@ -202,9 +215,10 @@ const stuQuesAns = async (req, res) => {
         .json({ msg: "Answered questions not found for the student." });
     }
   } catch (error) {
-    res
-      .status(500)
-      .json({ msg: "Server error(Question and Answer).", error: error.message });
+    res.status(500).json({
+      msg: "Server error(Question and Answer).",
+      error: error.message,
+    });
   }
 };
 

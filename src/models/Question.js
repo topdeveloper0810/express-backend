@@ -20,8 +20,10 @@ const QuestionSchema = new Schema({
   },
   level: {
     type: String,
-    enum: ["beginner", "intermediate", "advanced"],
-    default: "beginner",
+    // enum: ["beginner", "intermediate", "advanced"],
+    // default: "beginner",
+    enum: ["Iniciante", "Intermediário", "Avançado"],
+    default: "Iniciante",
   },
   questionDate: {
     type: Date,

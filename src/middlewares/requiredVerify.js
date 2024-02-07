@@ -1,8 +1,8 @@
 const User = require("../models/User");
 
 module.exports = async (req, res, next) => {
-    const { email, password } = req.body;
     try {
+        const { email, password } = req.body;
         await User.findOne({ email }).then((user) => {
             if (!user) {
                 return res.status(400).json({ msg: "No user." });
