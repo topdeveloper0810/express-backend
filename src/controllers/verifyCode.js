@@ -24,7 +24,7 @@ const sendCode = async (req, res) => {
             .save()
             .then()
             .catch((error) =>
-              res.status(400).json({ msg: "User vCode is not saved", err: error })
+              res.status(400).json({ msg: "User vCode is not saved", err: error.message })
             );
           const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
@@ -48,7 +48,7 @@ const sendCode = async (req, res) => {
           };
           transporter.sendMail(mailOptions, (err, info) => {
             if (err) {
-              res.status(500).json({ msg: err });
+              res.status(400).json({ msg:"Send Mail error.", err:err.message });
             } else {
               // create JWT payload
               const payload = {
@@ -76,12 +76,12 @@ const sendCode = async (req, res) => {
       .catch((error) =>
         res
           .status(500)
-          .json({ msg: "User verify error", err: error })
+          .json({ msg: "User verify error", err: error.message })
       );
   } catch (error) {
     res
       .status(500)
-      .json({ msg: "Send verify Code error", err: error });
+      .json({ msg: "Server error(Send Code).", err: error.message });
   }
 };
 
@@ -119,7 +119,7 @@ const verifyCode = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ msg: "Verify code error.", err: error });
+      .json({ msg: "Server error(Verify Code).", err: error.message });
   }
 };
 

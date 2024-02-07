@@ -14,6 +14,7 @@ router.delete(
   qaController.deleteQues
 );
 router.get("/allquesans", requiredAuth, requiredAdmin, qaController.allQuesAns);
+router.get("/stuques", requiredAuth, qaController.stuQues);
 router.post("/addans/:ques_id", requiredAuth, qaController.addAns);
 router.get("/stuquesans", requiredAuth, qaController.stuQuesAns);
 router.post("/trueans/:ques_id/:ans_id", requiredAuth, requiredAdmin, qaController.trueAns);

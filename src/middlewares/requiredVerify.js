@@ -13,6 +13,6 @@ module.exports = async (req, res, next) => {
             }
         });
     } catch (error) {
-        await res.status(401).json({ msg: "Verify error, login", error: error });
+        await res.status(500).json({ msg: "Server error(Verify middleware).", error: error.message });
     }
 };

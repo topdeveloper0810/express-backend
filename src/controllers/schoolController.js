@@ -30,7 +30,7 @@ const addSchool = async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ msg: "Server error(Add School)", error: error });
+    res.status(500).json({ msg: "Server error(Add School)", error: error.message });
   }
 };
 
@@ -53,7 +53,7 @@ const deleteSchool = async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ msg: "Server error(Delete School)", error: error });
+    res.status(500).json({ msg: "Server error(Delete School)", error: error.message });
   }
 };
 

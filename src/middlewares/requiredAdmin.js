@@ -8,6 +8,6 @@ module.exports = async (req, res, next) => {
       await next();
     }
   } catch (error) {
-    await res.status(401).json({ error: error });
+    await res.status(500).json({ msg:"Server error(Admin middleware).",error: error.message });
   }
 };

@@ -27,10 +27,10 @@ const addQues = async (req, res) => {
         )
       )
       .catch((err) =>
-        res.status(500).json({ msg: "New Question save error", err: err })
+        res.status(400).json({ msg: "New Question save error", err: err.message })
       );
   } catch (error) {
-    res.status(500).json({ msg: "Server error(Add Question).", error: error });
+    res.status(500).json({ msg: "Server error(Add Question).", error: error.message });
   }
 };
 
@@ -65,12 +65,12 @@ const deleteQues = async (req, res) => {
         }
       })
       .catch((err) => {
-        res.status(500).json({ msg: "Question delete error.", err: err });
+        res.status(500).json({ msg: "Question delete error.", err: err.message });
       });
   } catch (error) {
     res
       .status(500)
-      .json({ msg: "Server error(Delete Question).", error: error });
+      .json({ msg: "Server error(Delete Question).", error: error.message });
   }
 };
 
@@ -80,17 +80,53 @@ const deleteQues = async (req, res) => {
 const allQuesAns = async (req, res) => {
   try {
     await Question.find()
-      .sort({ date: 1 })
+      .sort({ date: -1 })
       .then((questions) => {
         res.status(200).json({ success: true, data: { questions } });
       })
       .catch((err) =>
-        res.status(500).json({ msg: "Questions and Answers error.", err: err })
+        res.status(500).json({ msg: "Questions and Answers error.", err: err.message })
       );
   } catch (error) {
     res
       .status(500)
-      .json({ msg: "Server error(All Question and Answer).", error: error });
+      .json({ msg: "Server error(All Question and Answer).", error: error.message });
+  }
+};
+
+// @route   GET api/v1/qa/stuques
+// @desc    Get answered Question and Answer for Student.
+// @access  Public
+const stuQues = async (req, res) => {
+  try {
+    const student = req.user;
+    const questions = await Question.find({ level: student.level });
+    if (questions.length > 0) {
+      const stuQuestion = questions.map((question) => {
+        const stuAnswer = question.answers.find(
+          (ans) => ans.student.toString() === student._id.toString()
+        );
+        return {
+          title: question.title,
+          question: question.question,
+          topic: question.topic,
+          level: question.level,
+          questionDate: question.questionDate,
+          answer: stuAnswer
+            ? {
+                stuAnswer,
+              }
+            : null,
+        };
+      });
+      res.status(200).json({ success: true, data: { stuQuestion } });
+    } else {
+      res.status(404).json({ msg: "Questions not found for the student." });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ msg: "Server error(Student Question).", error: error.message });
   }
 };
 
@@ -126,12 +162,12 @@ const addAns = async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ msg: "Server error (Add answer).", error: error });
+    res.status(500).json({ msg: "Server error (Add answer).", error: error.message });
   }
 };
 
 // @route   GET api/v1/qa/stuquesans
-// @desc    Get Question and Answer as answered.
+// @desc    Get answered Question and Answer for Student.
 // @access  Public
 const stuQuesAns = async (req, res) => {
   try {
@@ -140,7 +176,7 @@ const stuQuesAns = async (req, res) => {
       "answers.student": stu_id,
     });
     if (questions.length > 0) {
-      const studentAnswer = questions.map((question) => {
+      const stuAnswer = questions.map((question) => {
         const studentAnswer = question.answers.find(
           (ans) => ans.student.toString() === stu_id.toString()
         );
@@ -159,16 +195,16 @@ const stuQuesAns = async (req, res) => {
             : null,
         };
       });
-      res.status(200).json({ success: true, data: { studentAnswer } });
+      res.status(200).json({ success: true, data: { stuAnswer } });
     } else {
       res
         .status(404)
-        .json({ msg: "No answered questions found for the student." });
+        .json({ msg: "Answered questions not found for the student." });
     }
   } catch (error) {
     res
       .status(500)
-      .json({ msg: "Server error(Question and Answer).", error: error });
+      .json({ msg: "Server error(Question and Answer).", error: error.message });
   }
 };
 
@@ -206,6 +242,7 @@ module.exports = {
   addQues,
   deleteQues,
   allQuesAns,
+  stuQues,
   addAns,
   stuQuesAns,
   trueAns,
