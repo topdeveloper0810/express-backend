@@ -6,7 +6,7 @@ const test = async (req, res) => {
 
 // @route   GET api/v1/school/all
 // @desc    All Schools
-// @access  Private
+// @access  Publish
 const all = async (req, res) => {
   try {
     await School.find()

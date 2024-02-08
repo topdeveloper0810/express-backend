@@ -13,7 +13,7 @@ const UserSchema = new Schema({
 
 // Question Schema
 const QuestionSchema = new Schema({
-    topic: { type: String, required: true },
+    subject: { type: String, required: true },
     content: { type: String, required: true },
     level: { type: Number, required: true },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User' },

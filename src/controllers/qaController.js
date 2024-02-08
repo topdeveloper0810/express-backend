@@ -1,6 +1,7 @@
 const Question = require("../models/Question");
 const School = require("../models/School");
 const User = require("../models/User");
+const Subject = require("../models/Subject");
 
 const test = async (req, res) => {
   res.status(200).json({ msg: "Question api is running." });
@@ -11,24 +12,24 @@ const test = async (req, res) => {
 // @access  Private
 const addQues = async (req, res) => {
   try {
-    const { title, question, topic, level } = req.body;
+    const { title, question, subject, level } = req.body;
     const newQuestion = new Question({
       createdBy: req.user._id,
       title: title,
       question: question,
-      topic: topic,
+      // subject: subject,
       level: level,
     });
     await newQuestion
       .save()
-      .then(() =>
-        Question.find()
-          .sort({ questionDate: -1 })
-          .then(
-            (questions) =>
-              res.status(200).json({ success: true, data: { questions } })
-            // res.status(200).json({ success: true })
-          )
+      .then((question) =>
+        Subject.findOne({ name: subject }).then((subject) => {
+          subject.questions.push(question._id);
+          question.subject = subject._id;
+          question.save();
+          subject.save();
+          res.status(200).json({ success: true, data: { question } });
+        })
       )
       .catch((err) =>
         res
@@ -90,6 +91,7 @@ const deleteQues = async (req, res) => {
 const allQuesAns = async (req, res) => {
   try {
     await Question.find()
+      .populate("subject", "name")
       .sort({ questionDate: -1 })
       .then((questions) => {
         res.status(200).json({ success: true, data: { questions } });
@@ -113,7 +115,10 @@ const allQuesAns = async (req, res) => {
 const stuQues = async (req, res) => {
   try {
     const student = req.user;
-    const questions = await Question.find({ level: student.level });
+    const questions = await Question.find({ level: student.level }).populate(
+      "subject",
+      "name"
+    );
     if (questions.length > 0) {
       const stuQuestion = questions.map((question) => {
         const stuAnswer = question.answers.find(
@@ -122,7 +127,7 @@ const stuQues = async (req, res) => {
         return {
           title: question.title,
           question: question.question,
-          topic: question.topic,
+          subject: question.subject,
           level: question.level,
           questionDate: question.questionDate,
           answer: stuAnswer
@@ -198,7 +203,7 @@ const stuQuesAns = async (req, res) => {
         return {
           title: question.title,
           question: question.question,
-          topic: question.topic,
+          subject: question.subject,
           level: question.level,
           date: question.date,
           answer: studentAnswer

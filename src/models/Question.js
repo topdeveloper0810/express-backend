@@ -14,7 +14,7 @@ const QuestionSchema = new Schema({
     type: String,
     required: true,
   },
-  topic: {
+  subject: {
     type: String,
     required: true,
   },

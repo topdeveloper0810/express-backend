@@ -25,10 +25,15 @@ const UserSchema = new Schema({
   },
   level: {
     type: String,
-    enum: ["beginner", "intermediate", "advanced"],
+    // enum: ["beginner", "intermediate", "advanced"],
+    // required: () => {
+    //   return this.role === "student";
+    // },
+    enum: ["Iniciante", "Intermediário", "Avançado"],
     required: () => {
       return this.role === "student";
     },
+    default: "Iniciante",
   },
   correctQuestions: [
     {
