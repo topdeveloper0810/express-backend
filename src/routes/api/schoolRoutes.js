@@ -5,9 +5,14 @@ const schoolController = require("../../controllers/schoolController");
 const requiredAdmin = require("../../middlewares/requiredAdmin");
 const requiredAuth = require("../../middlewares/requiredAuth");
 
-router.get("/", requiredAuth, requiredAdmin, schoolController.test)
-router.get("/all", requiredAuth, schoolController.all)
-router.post("/add", requiredAuth, requiredAdmin, schoolController.addSchool)
-// router.delete("/delete/:school_id", requiredAuth, requiredAdmin, schoolController.deleteSchool)
+router.get("/", requiredAuth, requiredAdmin, schoolController.test);
+router.get("/all", requiredAuth, schoolController.all);
+router.post("/add", requiredAuth, requiredAdmin, schoolController.addSchool);
+router.delete(
+  "/delete/:school_id",
+  requiredAuth,
+  requiredAdmin,
+  schoolController.deleteSchool
+);
 
 module.exports = router;
