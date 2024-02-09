@@ -33,7 +33,6 @@ const UserSchema = new Schema({
     required: () => {
       return this.role === "student";
     },
-    default: "Iniciante",
   },
   correctQuestions: [
     {

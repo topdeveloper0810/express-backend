@@ -7,12 +7,13 @@ const requiredAdmin = require("../../middlewares/requiredAdmin");
 
 router.get("/", subjectController.test);
 router.get("/all", requiredAuth, subjectController.all);
-router.post("/add", requiredAuth, requiredAdmin, subjectController.addSubject);
+router.post("/addsubject", requiredAuth, requiredAdmin, subjectController.addSubject);
 router.delete(
   "/delete/:subject_id",
   requiredAuth,
   requiredAdmin,
   subjectController.deleteSubject
 );
+router.post("/addtopic/:subject_id", requiredAuth, requiredAdmin, subjectController.addTopic);
 
 module.exports = router;

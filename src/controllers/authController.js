@@ -16,50 +16,71 @@ const test = async (req, res) => {
 // @desc    Register a user
 // @access  Public
 const register = async (req, res) => {
-  const { name, email, password, school, level, role } = req.body;
+  try {
+    const { name, email, password, school, level, role } = req.body;
 
-  await User.findOne({ email }).then((user) => {
-    if (user) {
-      // errors.email = "Email already exists.";
-      // don't proceed because the user exists
-      return res.status(400).json({ msg: "Email already exists." });
-    } else {
-      // if user doesn't exist, create new User
-      const newUser = new User({
-        name: name,
-        email: email,
-        password: password,
-        // school: school,
-        level: level,
-        role: role,
-      });
-      bcrypt.genSalt(10, (err, salt) => {
-        bcrypt.hash(newUser.password, salt, (err, hash) => {
-          if (err) throw err;
-          newUser.password = hash;
-          newUser
-            .save()
-            .then((user) => {
-              if (user.role === "student") {
-                School.findOne({ schoolName: school }).then((school) => {
-                  school.students.push(user._id);
-                  user.school = school._id;
-                  user.save();
-                  school.save();
-                  // .then((school) =>
-                  //   res
-                  //     .status(200)
-                  //     .json({ success: true, data: { user, school } })
-                  // );
-                })
-              }
-              res.status(200).json({ success: true, data: { user } })
-            })
-            .catch((err) => res.status(500).json({msg:"User save error."}));
+    await User.findOne({ email }).then((user) => {
+      if (user) {
+        // errors.email = "Email already exists.";
+        // don't proceed because the user exists
+        return res.status(400).json({ msg: "Email already exists." });
+      } else {
+        // if user doesn't exist, create new User
+        const newUser = new User({
+          name: name,
+          email: email,
+          password: password,
+          // school: school,
+          level: level,
+          role: role,
         });
-      });
-    }
-  });
+        bcrypt.genSalt(10, (err, salt) => {
+          bcrypt.hash(newUser.password, salt, (err, hash) => {
+            if (err) throw err;
+            newUser.password = hash;
+            newUser
+              .save()
+              .then((user) => {
+                if (user.role === "student") {
+                  School.findOne({ schoolName: school })
+                    .then((school) => {
+                      if (school) {
+                        school.students.push(user._id);
+                        user.school = school._id;
+                        user.save();
+                        school.save();
+                        // .then((school) =>
+                        //   res
+                        //     .status(200)
+                        //     .json({ success: true, data: { user, school } })
+                        // );
+                      } else {
+                        res
+                          .status(404)
+                          .json({ msg: "School not found(Register)." });
+                      }
+                    })
+                    .catch((err) =>
+                      res.status(400).json({
+                        msg: "User's School save error.",
+                        err: err.message,
+                      })
+                    );
+                }
+                res.status(200).json({ success: true, data: { user } });
+              })
+              .catch((err) =>
+                res.status(500).json({ msg: "User save error." })
+              );
+          });
+        });
+      }
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ msg: "Server error(Register).", error: error.message });
+  }
 };
 
 // @route   POST api/v1/auth/login
@@ -69,37 +90,39 @@ const login = async (req, res) => {
   const { email, password } = req.body;
 
   // find user by email
-  await User.findOne({ email }).then((user) => {
-    // check for user
-    if (!user) {
-      return res.status(400).json({ msg: "User not found." });
-    }
-    // check for password
-    bcrypt.compare(password, user.password).then((isMatch) => {
-      if (isMatch) {
-        // user matched
-        // create JWT payload
-        const payload = {
-          _id: user._id,
-          email: user.email,
-        };
-        // sign token
-        jwt.sign(
-          payload,
-          secretOrKey,
-          { expiresIn: expiresIn },
-          (err, token) => {
-            res.status(200).json({
-              success: true,
-              data: { user, token: "Bearer " + token },
-            });
-          }
-        );
-      } else {
-        return res.status(400).json({ msg: "Incorrect password entered." });
+  await User.findOne({ email })
+    .populate("school", "schoolName")
+    .then((user) => {
+      // check for user
+      if (!user) {
+        return res.status(400).json({ msg: "User not found." });
       }
+      // check for password
+      bcrypt.compare(password, user.password).then((isMatch) => {
+        if (isMatch) {
+          // user matched
+          // create JWT payload
+          const payload = {
+            _id: user._id,
+            email: user.email,
+          };
+          // sign token
+          jwt.sign(
+            payload,
+            secretOrKey,
+            { expiresIn: expiresIn },
+            (err, token) => {
+              res.status(200).json({
+                success: true,
+                data: { user, token: "Bearer " + token },
+              });
+            }
+          );
+        } else {
+          return res.status(400).json({ msg: "Incorrect password entered." });
+        }
+      });
     });
-  });
 };
 
 // @route   POST api/v1/auth/logout

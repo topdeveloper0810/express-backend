@@ -12,10 +12,10 @@ const test = async (req, res) => {
 // @access  Private
 const addQues = async (req, res) => {
   try {
-    const { title, question, subject, level } = req.body;
+    const { topic, question, subject, level } = req.body;
     const newQuestion = new Question({
       createdBy: req.user._id,
-      title: title,
+      topic: topic,
       question: question,
       // subject: subject,
       level: level,
@@ -23,7 +23,7 @@ const addQues = async (req, res) => {
     await newQuestion
       .save()
       .then((question) =>
-        Subject.findOne({ name: subject }).then((subject) => {
+        Subject.findOne({ subjectName: subject }).then((subject) => {
           subject.questions.push(question._id);
           question.subject = subject._id;
           question.save();
@@ -68,6 +68,19 @@ const deleteQues = async (req, res) => {
               });
             }
           );
+          Subject.findById(deletedQuestion.subject)
+            .then((deletedQuesSubject) => {
+              deletedQuesSubject.questions =
+                deletedQuesSubject.questions.filter(
+                  (question) => question.toString() !== deleteques_id
+                );
+              deletedQuesSubject.save();
+            })
+            .catch((err) =>
+              res
+                .status(400)
+                .json({ msg: "Subject's question delete error", err: err })
+            );
           Question.find().then((questions) =>
             res.status(200).json({ success: true, data: { questions } })
           );
@@ -91,8 +104,9 @@ const deleteQues = async (req, res) => {
 const allQuesAns = async (req, res) => {
   try {
     await Question.find()
-      .populate("subject", "name")
       .sort({ questionDate: -1 })
+      .populate("subject", "subjectName")
+      .populate("answers.student", "name")
       .then((questions) => {
         res.status(200).json({ success: true, data: { questions } });
       })
@@ -117,7 +131,7 @@ const stuQues = async (req, res) => {
     const student = req.user;
     const questions = await Question.find({ level: student.level }).populate(
       "subject",
-      "name"
+      "subjectName"
     );
     if (questions.length > 0) {
       const stuQuestion = questions.map((question) => {
@@ -125,14 +139,16 @@ const stuQues = async (req, res) => {
           (ans) => ans.student.toString() === student._id.toString()
         );
         return {
-          title: question.title,
+          topic: question.topic,
           question: question.question,
           subject: question.subject,
           level: question.level,
           questionDate: question.questionDate,
           answer: stuAnswer
             ? {
-                stuAnswer,
+                answer: stuAnswer.answer,
+                isCorrect: stuAnswer.isCorrect,
+                answerDate: stuAnswer.answerDate,
               }
             : null,
         };
@@ -194,23 +210,24 @@ const stuQuesAns = async (req, res) => {
     const stu_id = req.user._id;
     const questions = await Question.find({
       "answers.student": stu_id,
-    });
+      "answers.isCorrect": true,
+    }).populate("subject", "subjectName");
     if (questions.length > 0) {
       const stuAnswer = questions.map((question) => {
-        const studentAnswer = question.answers.find(
+        const meAnswer = question.answers.find(
           (ans) => ans.student.toString() === stu_id.toString()
         );
         return {
-          title: question.title,
+          topic: question.topic,
           question: question.question,
           subject: question.subject,
           level: question.level,
-          date: question.date,
-          answer: studentAnswer
+          date: question.questionDate,
+          answer: meAnswer
             ? {
-                answer: studentAnswer.answer,
-                isCorrect: studentAnswer.isCorrect,
-                answerDate: studentAnswer.answerDate,
+                answer: meAnswer.answer,
+                isCorrect: meAnswer.isCorrect,
+                answerDate: meAnswer.answerDate,
               }
             : null,
         };

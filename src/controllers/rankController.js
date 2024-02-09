@@ -34,7 +34,16 @@ const rankUser = async (req, res) => {
       .populate("students", ["name", "level", "correctQuestions"])
       .then((userSchool) => {
         const students = userSchool.students;
-        res.status(200).json({ success: true, data: { students } });
+        const Students = students.map((student) => {
+          const correctAnsNum = student.correctQuestions.length;
+          return {
+            name: student.name,
+            level: student.level,
+            correctAnsNum: correctAnsNum,
+          };
+        });
+        Students.sort((a, b) => b.correctAnsNum - a.correctAnsNum);
+        res.status(200).json({ success: true, data: { Students } });
       })
       .catch((err) =>
         res.status(404).json({ msg: "School not found.", err: err.message })

@@ -6,7 +6,7 @@ const QuestionSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: "users",
   },
-  title: {
+  topic: {
     type: String,
     required: true,
   },
@@ -15,8 +15,10 @@ const QuestionSchema = new Schema({
     required: true,
   },
   subject: {
-    type: String,
-    required: true,
+    // type: String,
+    // required: true,
+    type: Schema.Types.ObjectId,
+    ref: "subjects",
   },
   level: {
     type: String,
