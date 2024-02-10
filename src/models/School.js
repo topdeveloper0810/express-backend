@@ -5,6 +5,7 @@ const SchoolSchema = new Schema({
   schoolName: {
     type: String,
     required: true,
+    unique: true,
   },
   description: {
     type: String,
