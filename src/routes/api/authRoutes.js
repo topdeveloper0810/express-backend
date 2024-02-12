@@ -12,5 +12,7 @@ router.post("/sendcode", verifyCode.sendCode);
 router.post("/verifycode", verifyCode.verifyCode);
 router.post("/login", requiredVerify, authController.login);
 router.post("/logout", requiredAuth, authController.logout);
+router.post("/forgotpassword", requiredVerify, authController.forgotPassword);
+
 
 module.exports = router;

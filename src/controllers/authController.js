@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const gravatar = require("gravatar");
 const dotenv = require("dotenv");
 const User = require("../models/User");
 const School = require("../models/School");
@@ -25,55 +26,61 @@ const register = async (req, res) => {
         // don't proceed because the user exists
         return res.status(400).json({ msg: "Email already exists." });
       } else {
+        const avatar = gravatar.url(email, {
+          s: "200",
+          r: "pg",
+          d: "mm",
+        });
         // if user doesn't exist, create new User
         const newUser = new User({
           name: name,
           email: email,
           password: password,
+          avatar: avatar,
           // school: school,
           level: level,
           role: role,
         });
-        bcrypt.genSalt(10, (err, salt) => {
-          bcrypt.hash(newUser.password, salt, (err, hash) => {
-            if (err) throw err;
-            newUser.password = hash;
-            newUser
-              .save()
-              .then((user) => {
-                if (user.role === "student") {
-                  School.findOne({ schoolName: school })
-                    .then((school) => {
-                      if (school) {
-                        school.students.push(user._id);
-                        user.school = school._id;
-                        user.save();
-                        school.save();
-                        // .then((school) =>
-                        //   res
-                        //     .status(200)
-                        //     .json({ success: true, data: { user, school } })
-                        // );
-                      } else {
-                        res
-                          .status(404)
-                          .json({ msg: "School not found(Register)." });
-                      }
-                    })
-                    .catch((err) =>
-                      res.status(400).json({
-                        msg: "User's School save error.",
-                        err: err.message,
-                      })
-                    );
-                }
-                res.status(200).json({ success: true, data: { user } });
-              })
-              .catch((err) =>
-                res.status(500).json({ msg: "User save error." })
-              );
-          });
-        });
+        // bcrypt.genSalt(10, (err, salt) => {
+        //   bcrypt.hash(newUser.password, salt, (err, hash) => {
+        //     if (err) throw err;
+        //     newUser.password = hash;
+        newUser
+          .save()
+          .then((user) => {
+            if (user.role === "student") {
+              School.findOne({ schoolName: school })
+                .then((school) => {
+                  if (school) {
+                    school.students.push(user._id);
+                    user.school = school._id;
+                    user.save();
+                    school.save();
+                    // .then((school) =>
+                    //   res
+                    //     .status(200)
+                    //     .json({ success: true, data: { user, school } })
+                    // );
+                  } else {
+                    res
+                      .status(404)
+                      .json({ msg: "School not found(Register)." });
+                  }
+                })
+                .catch((err) =>
+                  res.status(400).json({
+                    msg: "User's School save error.",
+                    err: err.message,
+                  })
+                );
+            }
+            res.status(200).json({ success: true, data: { user } });
+          })
+          .catch((err) =>
+            res.status(500).json({ msg: "User save error.", err: err.message })
+          );
+        // });
+        // });
       }
     });
   } catch (error) {
@@ -139,4 +146,45 @@ const logout = async (req, res) => {
   }
 };
 
-module.exports = { test, register, login, logout };
+// @route   POST api/v1/auth/forgotpassword
+// @desc    Post user forgotpassword
+// @access  Public
+const forgotPassword = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      res.status(404).json({ msg: "User not found." });
+    }
+    user.password = password;
+    await user
+      .save()
+      .then((user) => {
+        // create JWT payload
+        const payload = {
+          _id: user._id,
+        };
+        // sign token
+        jwt.sign(
+          payload,
+          secretOrKey,
+          // { expiresIn: expiresIn },
+          (err, token) => {
+            res.status(200).json({
+              success: true,
+              data: { user, token: "Bearer " + token },
+            });
+          }
+        );
+      })
+      .catch((err) =>
+        res.status(400).json({ msg: "User save error.", err: err.message })
+      );
+  } catch (error) {
+    res
+      .status(500)
+      .json({ msg: "Server error(FogotPassword).", error: error.message });
+  }
+};
+
+module.exports = { test, register, login, logout, forgotPassword };

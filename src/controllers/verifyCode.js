@@ -19,12 +19,14 @@ const sendCode = async (req, res) => {
           res.status(400).json({ msg: "This email is not exist." });
         } else {
           const VERIFY_CODE = Math.floor(100000 + Math.random() * 900000);
-          user.vCode = VERIFY_CODE;
+          user.active = VERIFY_CODE;
           user
             .save()
             .then()
             .catch((error) =>
-              res.status(400).json({ msg: "User vCode is not saved", err: error.message })
+              res
+                .status(400)
+                .json({ msg: "User active is not saved", err: error.message })
             );
           const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
@@ -48,13 +50,13 @@ const sendCode = async (req, res) => {
           };
           transporter.sendMail(mailOptions, (err, info) => {
             if (err) {
-              res.status(400).json({ msg:"Send Mail error.", err:err.message });
+              res
+                .status(400)
+                .json({ msg: "Send Mail error.", err: err.message });
             } else {
               // create JWT payload
               const payload = {
                 _id: user._id,
-                email: user.email,
-                vCode: user.vCode,
               };
               // sign token
               jwt.sign(
@@ -65,7 +67,7 @@ const sendCode = async (req, res) => {
                   res.status(200).json({
                     success: true,
                     msg: "Email sent successfully",
-                    data: { vCode: user.vCode, token: "Bearer " + token },
+                    data: { active: user.active, token: "Bearer " + token },
                   });
                 }
               );
@@ -74,9 +76,7 @@ const sendCode = async (req, res) => {
         }
       })
       .catch((error) =>
-        res
-          .status(500)
-          .json({ msg: "User verify error", err: error.message })
+        res.status(500).json({ msg: "User verify error", err: error.message })
       );
   } catch (error) {
     res
@@ -89,8 +89,8 @@ const sendCode = async (req, res) => {
 // @desc    Verify Code
 // @access  Public
 const verifyCode = async (req, res) => {
-  const token = req.headers.authorization.split(' ')[1];
-  const vCode = req.body.vCode;
+  const token = req.headers.authorization.split(" ")[1];
+  const active = req.body.active;
   if (!token) {
     return res.status(401).json({ msg: "No verify token." });
   }
@@ -99,21 +99,29 @@ const verifyCode = async (req, res) => {
       if (error) {
         return res.status(401).json({ msg: "Verify token is not valid." });
       } else {
-        if (decode.vCode == vCode) {
-          User.findById(decode._id).then((user) => {
-            user.vCode = 1;
+        User.findById(decode._id).then((user) => {
+          if (user.active == active) {
+            user.active = 1;
             user
               .save()
               .then(() => {
-                res.status(200).json({ success: true, vCode: user.vCode, data: "Verify Passed." });
+                res.status(200).json({
+                  success: true,
+                  active: user.active,
+                  data: "Verify Passed.",
+                });
               })
-              .catch((error) => res.status(500).json({msg: "vCode <= One error."}));
-          });
-        } else {
-          res
-            .status(400)
-            .json({vCode, msg: "The code is incorrect, try again" });
-        }
+              .catch((err) =>
+                res
+                  .status(400)
+                  .json({ msg: "active <= One error.", err: err.message })
+              );
+          } else {
+            res
+              .status(400)
+              .json({ active, msg: "The code is incorrect, try again" });
+          }
+        });
       }
     });
   } catch (error) {

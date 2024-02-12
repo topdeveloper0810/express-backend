@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
 const Schema = mongoose.Schema;
 
@@ -15,6 +16,9 @@ const UserSchema = new Schema({
   password: {
     type: String,
     required: [true, "Password is required!"],
+  },
+  avatar: {
+    type: String,
   },
   school: {
     type: Schema.Types.ObjectId,
@@ -45,7 +49,7 @@ const UserSchema = new Schema({
     enum: ["admin", "student"],
     default: "student",
   },
-  vCode: {
+  active: {
     type: Number,
     default: 0,
   },
@@ -55,12 +59,12 @@ const UserSchema = new Schema({
   },
 });
 
-// UserSchema.pre("save", async function (next) {
-//   if (this.isModified("password")) {
-//     const passwordGenSalt = bcrypt.genSaltSync(10);
-//     this.password = bcrypt.hashSync(this.password, passwordGenSalt);
-//   }
-//   next();
-// });
+UserSchema.pre("save", async function (next) {
+  if (this.isModified("password")) {
+    const passwordGenSalt = bcrypt.genSaltSync(10);
+    this.password = bcrypt.hashSync(this.password, passwordGenSalt);
+  }
+  next();
+});
 
 module.exports = User = mongoose.model("users", UserSchema);

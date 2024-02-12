@@ -26,9 +26,13 @@ const addQues = async (req, res) => {
         Subject.findOne({ subjectName: subject }).then((subject) => {
           subject.questions.push(question._id);
           question.subject = subject._id;
-          question.save();
           subject.save();
-          res.status(200).json({ success: true, data: { question } });
+          question.save();
+          question
+            .populate("subject", "subjectName")
+            .then(() =>
+              res.status(200).json({ success: true, data: { question } })
+            );
         })
       )
       .catch((err) =>
