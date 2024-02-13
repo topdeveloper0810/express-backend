@@ -34,50 +34,34 @@ const all = async (req, res) => {
 // @route   POST api/v1/subject/addsubject
 // @desc    Add Schools
 // @access  Private
-// const addSubject = async (req, res) => {
-//   try {
-//     const { subjectName } = req.body;
-//     Subject.findOne({ subjectName: subjectName }).then((subject) => {
-//       if (subject) {
-//         res.status(400).json({ msg: "Subject already exists." });
-//       } else {
-//         const newSubject = new Subject({
-//           subjectName: subjectName,
-//         });
-//         newSubject
-//           .save()
-//           .then(() =>
-//             Subject.find().then((subjects) => {
-//               res.status(200).json({ success: true, data: { subjects } });
-//             })
-//           )
-//           .catch((err) =>
-//             res
-//               .status(500)
-//               .json({ msg: "New Subject save error.", err: err.message })
-//           );
-//       }
-//     });
-//   } catch (error) {
-//     res
-//       .status(500)
-//       .json({ msg: "Server error(Add Subject)", error: error.message });
-//   }
-// };
-
 const addSubject = async (req, res) => {
   try {
     const { subjectName } = req.body;
-    const subject = await Subject.findOne({ subjectName });
-    if (subject) {
-      return res.status(400).json({ msg: "Subject already exists." });
-    }
-    const newSubject = new Subject({ subjectName });
-    await newSubject.save();
-    const subjects = await Subject.find();
-    res.status(200).json({ success: true, data: { subjects } });
+    Subject.findOne({ subjectName: subjectName }).then((subject) => {
+      if (subject) {
+        res.status(400).json({ msg: "Subject already exists." });
+      } else {
+        const newSubject = new Subject({
+          subjectName: subjectName,
+        });
+        newSubject
+          .save()
+          .then(() =>
+            Subject.find().then((subjects) => {
+              res.status(200).json({ success: true, data: { subjects } });
+            })
+          )
+          .catch((err) =>
+            res
+              .status(500)
+              .json({ msg: "New Subject save error.", err: err.message })
+          );
+      }
+    });
   } catch (error) {
-    res.status(500).json({ msg: "Server error (Add Subject)", error: error.message });
+    res
+      .status(500)
+      .json({ msg: "Server error(Add Subject)", error: error.message });
   }
 };
 
@@ -125,14 +109,14 @@ const addTopic = async (req, res) => {
             res.status(400).json({ msg: "Topic is required." });
           } else {
             subject.topic.push(topic);
-            subject.save();
-            // .then(() =>
-            //   res.status(200).json({ success: true, data: { subject } })
-            // );
+            subject
+              .save()
+              .then(() =>
+                Subject.find().then((subjects) =>
+                  res.status(200).json({ success: true, data: { subjects } })
+                )
+              );
           }
-          Subject.find().then((subjects) =>
-            res.status(200).json({ success: true, data: { subjects } })
-          );
         }
       })
       .catch((err) =>

@@ -4,10 +4,15 @@ const router = express.Router();
 const userController = require("../../controllers/userController");
 const requireAuth = require("../../middlewares/requiredAuth");
 const requiredAdmin = require("../../middlewares/requiredAdmin");
-const requiredVerify = require("../../middlewares/requiredVerify");
 
 router.get("/", userController.test);
 router.get("/me", requireAuth, userController.me);
 router.get("/all", requireAuth, requiredAdmin, userController.all);
+router.post(
+  "/changeadmin",
+  requireAuth,
+  requiredAdmin,
+  userController.changeAdmin
+);
 
 module.exports = router;

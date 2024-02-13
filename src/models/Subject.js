@@ -5,13 +5,13 @@ const SubjectSchema = new Schema({
   subjectName: {
     type: String,
     required: [true, "Subject is required!"],
-    unquie: true,
+    unique: [true, "Subject already exists."],
   },
   topic: [
     {
       type: String,
       required: [true, "Topic is required!"],
-      unique: true,
+      unique: [true, "Topic already exists."],
     },
   ],
   questions: [

@@ -26,6 +26,34 @@ const me = async (req, res) => {
   }
 };
 
+// @route   POST api/v1/user/admin
+// @desc    Post admin
+// @access  Privat
+const changeAdmin = async (req, res) => {
+  try {
+    const user = req.user;
+    const { name, email, avatar } = req.body;
+    const oldAdmin = await User.findById(user._id);
+    if (!oldAdmin) {
+      res.status(404).json({ msg: "Admin not found." });
+    }
+
+    oldAdmin.name = name;
+    oldAdmin.email = email;
+    oldAdmin.avatar = avatar;
+    await oldAdmin
+      .save()
+      .then(() => res.status(200).json({ success: true, data: { oldAdmin } }))
+      .catch((err) =>
+        res.status(400).json({ msg: "Admin save error.", err: err.message })
+      );
+  } catch (error) {
+    res
+      .status(500)
+      .json({ msg: "Server error(Change admin).", error: error.message });
+  }
+};
+
 // @route   GET api/v1/user/all
 // @desc    Get all user
 // @access  Private
@@ -38,4 +66,4 @@ const all = async (req, res) => {
     .catch((err) => res.status(404).json({ msg: "No users found." }));
 };
 
-module.exports = { test, me, all };
+module.exports = { test, me, all, changeAdmin };
