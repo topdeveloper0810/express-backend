@@ -9,11 +9,11 @@ router.get("/", userController.test);
 router.get("/me", requireAuth, userController.me);
 router.get("/admin", requireAuth, requiredAdmin, userController.admin);
 router.get("/all", requireAuth, requiredAdmin, userController.all);
-router.post(
-  "/changeadmin",
+router.put(
+  "/updateadmin",
   requireAuth,
   requiredAdmin,
-  userController.changeAdmin
+  userController.updateAdmin
 );
 
 module.exports = router;

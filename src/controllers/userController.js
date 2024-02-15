@@ -46,10 +46,10 @@ const admin = async (req, res) => {
   }
 };
 
-// @route   POST api/v1/user/changeadmin
-// @desc    Post change admin
+// @route   POST api/v1/user/updateadmin
+// @desc    Post update admin
 // @access  Privat
-const changeAdmin = async (req, res) => {
+const updateAdmin = async (req, res) => {
   try {
     const user = req.user;
     const { name, email, avatar, password, newPassword } = req.body;
@@ -102,4 +102,4 @@ const all = async (req, res) => {
     );
 };
 
-module.exports = { test, me, all, changeAdmin, admin };
+module.exports = { test, me, all, updateAdmin, admin };
