@@ -146,8 +146,8 @@ const logout = async (req, res) => {
   }
 };
 
-// @route   POST api/v1/auth/forgotpassword
-// @desc    Post user forgotpassword
+// @route   PUT api/v1/auth/forgotpassword
+// @desc    PUT user forgotpassword
 // @access  Public
 const forgotPassword = async (req, res) => {
   try {

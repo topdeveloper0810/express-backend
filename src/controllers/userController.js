@@ -46,8 +46,8 @@ const admin = async (req, res) => {
   }
 };
 
-// @route   POST api/v1/user/updateadmin
-// @desc    Post update admin
+// @route   PUT api/v1/user/updateadmin
+// @desc    PUT update admin
 // @access  Privat
 const updateAdmin = async (req, res) => {
   try {
