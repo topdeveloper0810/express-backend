@@ -1,6 +1,9 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 const dotenv = require("dotenv");
+const fs = require("fs");
+const path = require("path");
 
 dotenv.config();
 
@@ -26,26 +29,57 @@ const me = async (req, res) => {
   }
 };
 
-// @route   POST api/v1/user/admin
-// @desc    Post admin
+// @route   GET api/v1/user/admin
+// @desc    Get admin
+// @access  Private
+const admin = async (req, res) => {
+  try {
+    const user = req.user;
+    await User.findById(user._id)
+      .select("-password")
+      .then((admin) => res.status(200).json({ success: true, data: { admin } }))
+      .catch((err) =>
+        res.status(404).json({ msg: "No user found.", err: err.message })
+      );
+  } catch (error) {
+    res.status(500).json({ msg: "Server error(About admin).", error: error });
+  }
+};
+
+// @route   POST api/v1/user/changeadmin
+// @desc    Post change admin
 // @access  Privat
 const changeAdmin = async (req, res) => {
   try {
     const user = req.user;
-    const { name, email, avatar } = req.body;
-    const oldAdmin = await User.findById(user._id);
-    if (!oldAdmin) {
-      res.status(404).json({ msg: "Admin not found." });
-    }
-
-    oldAdmin.name = name;
-    oldAdmin.email = email;
-    oldAdmin.avatar = avatar;
-    await oldAdmin
-      .save()
-      .then(() => res.status(200).json({ success: true, data: { oldAdmin } }))
+    const { name, email, avatar, password, newPassword } = req.body;
+    await User.findById(user._id)
+      .then(async (admin) => {
+        if (!admin) {
+          return res.status(404).json({ msg: "Admin not found." });
+        }
+        const isMatch = await bcrypt.compare(password, admin.password);
+        if (isMatch) {
+          if (name) {
+            admin.name = name;
+          }
+          if (email) {
+            admin.email = email;
+          }
+          if (newPassword) {
+            admin.password = newPassword;
+          }
+          if (avatar) {
+            admin.avatar = avatar;
+          }
+          await admin.save();
+          return res.status(200).json({ success: true, data: { admin } });
+        } else {
+          return res.status(400).json({ msg: "Password is incorrect." });
+        }
+      })
       .catch((err) =>
-        res.status(400).json({ msg: "Admin save error.", err: err.message })
+        res.status(400).json({ msg: "Admin update error.", err: err.message })
       );
   } catch (error) {
     res
@@ -63,7 +97,9 @@ const all = async (req, res) => {
     .select("-password")
     .sort({ date: 1 })
     .then((users) => res.status(200).json({ success: true, data: { users } }))
-    .catch((err) => res.status(404).json({ msg: "No users found." }));
+    .catch((err) =>
+      res.status(404).json({ msg: "No users found.", err: err.message })
+    );
 };
 
-module.exports = { test, me, all, changeAdmin };
+module.exports = { test, me, all, changeAdmin, admin };
