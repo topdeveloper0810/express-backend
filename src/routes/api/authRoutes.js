@@ -14,5 +14,4 @@ router.post("/login", requiredVerify, authController.login);
 router.post("/logout", requiredAuth, authController.logout);
 router.put("/forgotpassword", requiredVerify, authController.forgotPassword);
 
-
 module.exports = router;
