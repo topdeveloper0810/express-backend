@@ -49,6 +49,12 @@ const UserSchema = new Schema({
     enum: ["admin", "student"],
     default: "student",
   },
+  notify: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "notifys",
+    },
+  ],
   active: {
     type: Number,
     default: 0,

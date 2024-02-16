@@ -4,7 +4,7 @@ const User = require("../models/User");
 const Subject = require("../models/Subject");
 
 const test = async (req, res) => {
-  res.status(200).json({ msg: "Question api is running." });
+  res.status(200).json({ msg: "Question api is running..." });
 };
 
 // @route   POST api/v1/qa/addques
@@ -44,6 +44,35 @@ const addQues = async (req, res) => {
     res
       .status(500)
       .json({ msg: "Server error(Add Question).", error: error.message });
+  }
+};
+
+// @route   PUT api/v1/qa/updateques/:updateques_id
+// @desc    PUT update Question
+// @access  Private
+const updateQues = async (req, res) => {
+  try {
+    const updateques_id = req.params.updateques_id;
+    const { topic, question, subject, level } = req.body;
+    const foundSubject = await Subject.findOne({ subjectName: subject });
+    if (!foundSubject) {
+      res.status(404).json({ msg: "Subject not found." });
+    }
+    await Question.findByIdAndUpdate(updateques_id, {
+      topic,
+      question,
+      subject: foundSubject._id,
+      level,
+    });
+    await Question.findById(updateques_id)
+      .populate("subject", "subjectName")
+      .then((updatedques) => {
+        res.status(200).json({ success: true, data: { updatedques } });
+      });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ msg: "Server error(Update Question).", error: error.message });
   }
 };
 
@@ -282,6 +311,7 @@ const trueAns = async (req, res) => {
 module.exports = {
   test,
   addQues,
+  updateQues,
   deleteQues,
   allQuesAns,
   stuQues,
