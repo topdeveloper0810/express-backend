@@ -2,6 +2,7 @@ const Question = require("../models/Question");
 const School = require("../models/School");
 const User = require("../models/User");
 const Subject = require("../models/Subject");
+const Answer = require("../models/Answer");
 
 const test = async (req, res) => {
   res.status(200).json({ msg: "Question api is running..." });
@@ -20,21 +21,18 @@ const addQues = async (req, res) => {
       // subject: subject,
       level: level,
     });
-    await newQuestion
-      .save()
-      .then((question) =>
-        Subject.findOne({ subjectName: subject }).then((subject) => {
-          subject.questions.push(question._id);
-          question.subject = subject._id;
-          subject.save();
-          question.save();
-          question
-            .populate("subject", "subjectName")
-            .then(() =>
-              res.status(200).json({ success: true, data: { question } })
-            );
-        })
-      )
+    await Subject.findOne({ subjectName: subject })
+      .then((subject) => {
+        subject.questions.push(newQuestion._id);
+        newQuestion.subject = subject._id;
+        subject.save();
+        newQuestion.save();
+        newQuestion
+          .populate("subject", "subjectName")
+          .then(() =>
+            res.status(200).json({ success: true, data: { newQuestion } })
+          );
+      })
       .catch((err) =>
         res
           .status(400)
@@ -82,48 +80,58 @@ const updateQues = async (req, res) => {
 const deleteQues = async (req, res) => {
   try {
     const deleteques_id = req.params.deleteques_id;
-    await Question.findByIdAndDelete(deleteques_id)
-      .then((deletedQuestion) => {
-        if (!deletedQuestion) {
-          return res.status(404).json({ msg: "Question not found." });
-        } else {
-          User.find({ correctQuestions: deleteques_id }).then(
-            (usersDeletedQuestion) => {
-              usersDeletedQuestion.map((user) => {
-                user.correctQuestions = user.correctQuestions.filter(
-                  (ques_id) => ques_id.toString() !== deleteques_id
-                );
-                user.save();
-                School.findById(user.school).then((school) => {
-                  school.correctAnsNum -= 1;
-                  school.save();
-                });
-              });
-            }
-          );
-          Subject.findById(deletedQuestion.subject)
-            .then((deletedQuesSubject) => {
-              deletedQuesSubject.questions =
-                deletedQuesSubject.questions.filter(
-                  (question) => question.toString() !== deleteques_id
-                );
-              deletedQuesSubject.save();
-            })
-            .catch((err) =>
-              res
-                .status(400)
-                .json({ msg: "Subject's question delete error", err: err })
-            );
-          Question.find().then((questions) =>
-            res.status(200).json({ success: true, data: { questions } })
-          );
-        }
-      })
-      .catch((err) => {
-        res
-          .status(500)
-          .json({ msg: "Question delete error.", err: err.message });
+    const deletedQuestion = await Question.findByIdAndDelete(deleteques_id);
+
+    if (!deletedQuestion) {
+      return res.status(404).json({ msg: "Question not found." });
+    }
+
+    const quesSubject = deletedQuestion.subject;
+
+    const usersDeletedQuestion = await User.find({
+      "correctQuestions.subject": quesSubject,
+    });
+
+    for (const user of usersDeletedQuestion) {
+      const cQs = user.correctQuestions;
+      const cSQs = cQs.filter(
+        (cQ) => cQ.subject.toString() === quesSubject.toString()
+      );
+      const questions = cSQs[0].questions;
+      const index = questions.findIndex(
+        (ques) => ques.question.toString() === deleteques_id.toString()
+      );
+      if (index !== -1) {
+        questions.splice(index, 1);
+        await user.save();
+
+        const school = await School.findById(user.school);
+        const schoolCA = school.correctAnsNum.find(
+          (cA) => cA.subject.toString() === quesSubject.toString()
+        );
+        schoolCA.correctNum -= 1;
+        await school.save();
+      }
+    }
+
+    const deletedQuesSubject = await Subject.findById(quesSubject);
+    deletedQuesSubject.questions = deletedQuesSubject.questions.filter(
+      (question) => question.toString() !== deleteques_id
+    );
+    await deletedQuesSubject.save();
+
+    // Mongoose's deleteMany() method to delete multiple documents from the "Answer" collection where the question field matches the value of deleteques_id.
+    await Answer.deleteMany({ question: deleteques_id });
+
+    // res.status(200).json({ success: true, data: { deletedQuestion } });
+    const questions = await Question.find()
+      .populate("subject", "subjectName")
+      .populate({
+        path: "answers",
+        select: "-question",
+        populate: { path: "student", select: "name" },
       });
+    res.status(200).json({ success: true, data: { questions } });
   } catch (error) {
     res
       .status(500)
@@ -136,18 +144,15 @@ const deleteQues = async (req, res) => {
 // @access  Private
 const allQuesAns = async (req, res) => {
   try {
-    await Question.find()
+    const questions = await Question.find()
       .sort({ questionDate: -1 })
       .populate("subject", "subjectName")
-      .populate("answers.student", "name")
-      .then((questions) => {
-        res.status(200).json({ success: true, data: { questions } });
-      })
-      .catch((err) =>
-        res
-          .status(500)
-          .json({ msg: "Questions and Answers error.", err: err.message })
-      );
+      .populate({
+        path: "answers",
+        select: "-question",
+        populate: { path: "student", select: "name" },
+      });
+    res.status(200).json({ success: true, data: { questions } });
   } catch (error) {
     res.status(500).json({
       msg: "Server error(All Question and Answer).",
@@ -162,30 +167,20 @@ const allQuesAns = async (req, res) => {
 const stuQues = async (req, res) => {
   try {
     const student = req.user;
-    const questions = await Question.find({ level: student.level }).populate(
-      "subject",
-      "subjectName"
-    );
+    const questions = await Question.find({ level: student.level })
+      .sort({ questionDate: -1 })
+      .populate("subject", "subjectName")
+      .select("-answers");
     if (questions.length > 0) {
-      const stuQuestion = questions.map((question) => {
-        const stuAnswer = question.answers.find(
-          (ans) => ans.student.toString() === student._id.toString()
-        );
-        return {
-          topic: question.topic,
-          question: question.question,
-          subject: question.subject,
-          level: question.level,
-          questionDate: question.questionDate,
-          answer: stuAnswer
-            ? {
-                answer: stuAnswer.answer,
-                isCorrect: stuAnswer.isCorrect,
-                answerDate: stuAnswer.answerDate,
-              }
-            : null,
-        };
-      });
+      const stuQuestion = await Promise.all(
+        questions.map(async (question) => {
+          const stuAnswer = await Answer.findOne({
+            question: question._id,
+            student: student._id,
+          }).select("-question -student");
+          return { question, stuAnswer };
+        })
+      );
       res.status(200).json({ success: true, data: { stuQuestion } });
     } else {
       res.status(404).json({ msg: "Questions not found for the student." });
@@ -204,30 +199,30 @@ const addAns = async (req, res) => {
   try {
     const stu_id = req.user._id;
     const ques_id = req.params.ques_id;
-    const answerText = req.body.answer; // Renamed to avoid variable name conflict
-    await Question.findById(ques_id).then((question) => {
-      const answer = question.answers.find(
-        (ans) => ans.student.toString() === stu_id.toString()
-      );
-      if (answer) {
-        res.status(400).json({ msg: "Answer already exists." });
+    const answerText = req.body.answer;
+
+    const question = await Question.findById(ques_id);
+    const answer = await Answer.findOne({ question: ques_id, student: stu_id });
+
+    if (answer) {
+      res.status(400).json({ msg: "Answer already exists." });
+    } else {
+      if (!answerText) {
+        res.status(400).json({ msg: "Answer is required." });
       } else {
-        if (!answerText) {
-          res.status(400).json({ msg: "Answer is required." });
-        } else {
-          const newAnswer = {
-            student: req.user._id,
-            answer: answerText,
-          };
-          question.answers.push(newAnswer);
-          question
-            .save()
-            .then(() =>
-              res.status(200).json({ success: true, data: { question } })
-            );
-        }
+        const newAnswer = new Answer({
+          student: stu_id,
+          question: ques_id,
+          answer: answerText,
+        });
+
+        await newAnswer.save();
+        question.answers.unshift(newAnswer._id);
+        await question.save();
+
+        res.status(200).json({ success: true, data: { newAnswer } });
       }
-    });
+    }
   } catch (error) {
     res
       .status(500)
@@ -284,27 +279,64 @@ const stuQuesAns = async (req, res) => {
 // @access  Private
 const trueAns = async (req, res) => {
   try {
-    const ques_id = req.params.ques_id;
-    const ans_id = req.params.ans_id;
+    const { ques_id, ans_id } = req.params;
     const question = await Question.findById(ques_id);
-    const answer = question.answers.find(
-      (ans) => ans._id.toString() === ans_id
-    );
+    const answer = await Answer.findOne({ _id: ans_id, question: ques_id });
     if (answer) {
-      answer.isCorrect = true;
-      await question.save();
-      const user = await User.findById(answer.student);
-      user.correctQuestions.push(ques_id);
-      await user.save();
-      const school = await School.findById(user.school);
-      school.correctAnsNum += 1;
-      await school.save();
-      res.status(200).json({ success: true, msg: "Answer marked as correct." });
+      if (answer.isCorrect) {
+        res.status(400).json({ msg: "This Answer already true." });
+      } else {
+        answer.isCorrect = true;
+        await answer.save();
+
+        const student = await User.findById(answer.student);
+        if (!student) {
+          res.status(404).json({ msg: "Student not found." });
+        } else {
+          const stuCorrect = student.correctQuestions.find(
+            (cq) => cq.subject.toString() === question.subject.toString()
+          );
+          const correctquestion = { question: ques_id };
+          if (!stuCorrect) {
+            student.correctQuestions.push({
+              subject: question.subject,
+              questions: [correctquestion],
+            });
+          } else {
+            stuCorrect.questions.push(correctquestion);
+          }
+          await student.save();
+        }
+
+        const school = await School.findById(student.school);
+        if (!school) {
+          return res.status(404).json({ msg: "School not found." });
+        } else {
+          const schoolCorrect = school.correctAnsNum.find(
+            (ca) => ca.subject.toString() === question.subject.toString()
+          );
+          if (!schoolCorrect) {
+            school.correctAnsNum.push({
+              subject: question.subject,
+              correctNum: 1,
+            });
+          } else {
+            schoolCorrect.correctNum += 1;
+          }
+          await school.save();
+        }
+
+        res
+          .status(200)
+          .json({ success: true, msg: "Answer marked as correct." });
+      }
     } else {
       res.status(404).json({ msg: "Answer not found." });
     }
   } catch (error) {
-    res.status(500).json({ msg: "Server error (True Answer)." });
+    res
+      .status(500)
+      .json({ msg: "Server error (True Answer).", error: error.message });
   }
 };
 

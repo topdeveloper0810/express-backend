@@ -31,7 +31,7 @@ const all = async (req, res) => {
   }
 };
 
-// @route   POST api/v1/subject/addsubject
+// @route   POST api/v1/subject/add
 // @desc    Add Schools
 // @access  Private
 const addSubject = async (req, res) => {
@@ -47,9 +47,10 @@ const addSubject = async (req, res) => {
         newSubject
           .save()
           .then(() =>
-            Subject.find().then((subjects) => {
-              res.status(200).json({ success: true, data: { subjects } });
-            })
+            // Subject.find().then((subjects) => {
+            //   res.status(200).json({ success: true, data: { subjects } });
+            // })
+            res.status(200).json({ success: true, data: { newSubject } })
           )
           .catch((err) =>
             res
@@ -109,13 +110,12 @@ const addTopic = async (req, res) => {
             res.status(400).json({ msg: "Topic is required." });
           } else {
             subject.topic.push(topic);
-            subject
-              .save()
-              .then(() =>
-                Subject.find().then((subjects) =>
-                  res.status(200).json({ success: true, data: { subjects } })
-                )
-              );
+            subject.save().then(() =>
+              // res.status(200).json({ success: true, data: { subject } })
+              Subject.find().then((subjects) =>
+                res.status(200).json({ success: true, data: { subjects } })
+              )
+            );
           }
         }
       })

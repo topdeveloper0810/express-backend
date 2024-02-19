@@ -5,7 +5,7 @@ const requiredAuth = require("../../middlewares/requiredAuth");
 const rankController = require("../../controllers/rankController");
 
 router.get("/", rankController.test);
-router.get("/rankschool", requiredAuth, rankController.rankSchool);
-router.get("/rankuser", requiredAuth, rankController.rankUser);
+router.get("/schoolrank", requiredAuth, rankController.rankSchool);
+router.get("/studentrank", requiredAuth, rankController.rankUser);
 
 module.exports = router;

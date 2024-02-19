@@ -7,7 +7,7 @@ const requiredAdmin = require("../../middlewares/requiredAdmin");
 
 router.get("/", subjectController.test);
 router.get("/all", requiredAuth, subjectController.all);
-router.post("/addsubject", requiredAuth, requiredAdmin, subjectController.addSubject);
+router.post("/add", requiredAuth, requiredAdmin, subjectController.addSubject);
 router.delete(
   "/delete/:subject_id",
   requiredAuth,

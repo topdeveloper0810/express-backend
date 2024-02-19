@@ -33,22 +33,8 @@ const QuestionSchema = new Schema({
   },
   answers: [
     {
-      student: {
-        type: Schema.Types.ObjectId,
-        ref: "users",
-      },
-      answer: {
-        type: String,
-        required: true,
-      },
-      isCorrect: {
-        type: Boolean,
-        default: false,
-      },
-      answerDate: {
-        type: Date,
-        default: Date.now,
-      },
+      type: Schema.Types.ObjectId,
+      ref: "answers",
     },
   ],
 });

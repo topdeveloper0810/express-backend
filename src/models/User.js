@@ -40,8 +40,22 @@ const UserSchema = new Schema({
   },
   correctQuestions: [
     {
-      type: Schema.Types.ObjectId,
-      ref: "questions",
+      subject: {
+        type: Schema.Types.ObjectId,
+        ref: "subjects",
+      },
+      questions: [
+        {
+          question: {
+            type: Schema.Types.ObjectId,
+            ref: "questions",
+          },
+          date: {
+            type: Date,
+            default: Date.now,
+          },
+        },
+      ],
     },
   ],
   role: {
@@ -53,6 +67,9 @@ const UserSchema = new Schema({
     {
       type: Schema.Types.ObjectId,
       ref: "notifys",
+      required: () => {
+        return this.role === "student";
+      },
     },
   ],
   active: {

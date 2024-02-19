@@ -16,10 +16,18 @@ const SchoolSchema = new Schema({
       ref: "users",
     },
   ],
-  correctAnsNum: {
-    type: Number,
-    default: 0,
-  },
+  correctAnsNum: [
+    {
+      subject: {
+        type: Schema.Types.ObjectId,
+        ref: "subjects",
+      },
+      correctNum: {
+        type: Number,
+        default: 0,
+      },
+    },
+  ],
   date: {
     type: Date,
     default: Date.now,

@@ -14,7 +14,7 @@ const all = async (req, res) => {
         res.status(200).json({ success: true, data: { schools } })
       )
       .catch((err) =>
-        res.status(500).json({ msg: "Schools not found.", err: err.message })
+        res.status(400).json({ msg: "Schools not found.", err: err.message })
       );
   } catch (error) {
     res
@@ -39,10 +39,8 @@ const addSchool = async (req, res) => {
         });
         newSchool
           .save()
-          .then(() =>
-            School.find().then((schools) => {
-              res.status(200).json({ success: true, data: { schools } });
-            })
+          .then(
+            () => res.status(200).json({ success: true, data: { newSchool } })
           )
           .catch((err) =>
             res
