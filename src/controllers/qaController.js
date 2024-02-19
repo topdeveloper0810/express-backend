@@ -221,6 +221,7 @@ const addAns = async (req, res) => {
         await question.save();
 
         res.status(200).json({ success: true, data: { newAnswer } });
+        Question.find()
       }
     }
   } catch (error) {

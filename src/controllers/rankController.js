@@ -41,6 +41,7 @@ const rankStudentBySubject = async (students, subjectId) => {
     return {
       student: student.name,
       level: student.level,
+      avatar:student.avatar,
       score,
     };
   });
@@ -85,7 +86,9 @@ const rankSchool = async (req, res) => {
 
     const total = rankedSchools.sort((a, b) => b.score - a.score);
 
-    res.status(200).json({ mathRank, portRank, total });
+    res
+      .status(200)
+      .json({ success: true, data: { mathRank, portRank, total } });
   } catch (error) {
     res
       .status(500)
@@ -127,13 +130,16 @@ const rankUser = async (req, res) => {
       return {
         student: student.name,
         level: student.level,
+        avatar:student.avatar,
         score,
       };
     });
 
     const total = rankedStudents.sort((a, b) => b.score - a.score);
 
-    res.status(200).json({ mathRank, portRank, total });
+    res
+      .status(200)
+      .json({ success: true, data: { mathRank, portRank, total } });
   } catch (error) {
     res
       .status(500)

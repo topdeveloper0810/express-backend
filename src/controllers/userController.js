@@ -19,7 +19,7 @@ const me = async (req, res) => {
     const user = req.user;
     await User.findById(user._id)
       .populate("school", "schoolName")
-      .select("-password")
+      .select("-password -correctQuestions -role -active")
       .then((user) => res.status(200).json({ success: true, data: { user } }))
       .catch((err) => res.status(404).json({ msg: "No user found." }));
   } catch (error) {
