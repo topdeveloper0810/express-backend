@@ -54,7 +54,7 @@ const addNotify = async (req, res) => {
 // @route   DELETE api/v1/notify/admindeletenotify/:notify_id
 // @desc    DELETE Notification
 // @access  Private
-const adminDdeleteNotify = async (req, res) => {
+const adminDeleteNotify = async (req, res) => {
   try {
     const notify_id = req.params.notify_id;
     const deletedNotify = await Notify.findByIdAndDelete(notify_id);
@@ -131,7 +131,7 @@ const stuDeleteNotify = async (req, res) => {
 module.exports = {
   test,
   addNotify,
-  adminDdeleteNotify,
+  adminDeleteNotify,
   allNotifys,
   stuDeleteNotify,
 };

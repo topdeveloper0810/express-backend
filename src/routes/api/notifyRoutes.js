@@ -16,7 +16,7 @@ router.delete(
   "/admindeletenotify/:notify_id",
   requiredAuth,
   requiredAdmin,
-  notifyController.adminDdeleteNotify
+  notifyController.adminDeleteNotify
 );
 router.get(
   "/allnotifys",
