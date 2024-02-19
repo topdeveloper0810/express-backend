@@ -40,6 +40,7 @@ const rankStudentBySubject = async (students, subjectId) => {
 
     return {
       student: student.name,
+      level: student.level,
       score,
     };
   });
@@ -77,7 +78,7 @@ const rankSchool = async (req, res) => {
       });
 
       return {
-        schoolName: school.schoolName,
+        school: school.schoolName,
         score,
       };
     });
@@ -124,7 +125,8 @@ const rankUser = async (req, res) => {
       });
 
       return {
-        studentName: student.name,
+        student: student.name,
+        level: student.level,
         score,
       };
     });
@@ -133,7 +135,6 @@ const rankUser = async (req, res) => {
 
     res.status(200).json({ mathRank, portRank, total });
   } catch (error) {
-    console.log(error);
     res
       .status(500)
       .json({ msg: "Server error(User rank).", error: error.message });
