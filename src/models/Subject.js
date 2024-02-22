@@ -27,8 +27,10 @@ const Subject = mongoose.model("subjects", SubjectSchema);
 
 // Add initial subjects
 const initialSubjects = [
-  { subjectName: "Mathematics", topic: [], questions: [] },
-  { subjectName: "Portuguese", topic: [], questions: [] },
+  // { subjectName: "Mathematics", topic: [], questions: [] },
+  // { subjectName: "Portuguese", topic: [], questions: [] },
+  { subjectName: "Matemática", topic: [], questions: [] },
+  { subjectName: "Português", topic: [], questions: [] },
 ];
 
 // Insert the initial subjects into the "subjects" collection

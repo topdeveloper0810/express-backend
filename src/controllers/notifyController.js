@@ -42,7 +42,9 @@ const addNotify = async (req, res) => {
       user.notify.unshift(newNotify._id);
       user.save();
     });
-    res.status(200).json({ success: true, data: { newNotify } });
+    newNotify.populate("createdBy", ["name", "avatar"]).then(() => {
+      res.status(200).json({ success: true, data: { newNotify } });
+    });
     // res.status(200).json({ data: { users } });
   } catch (error) {
     res

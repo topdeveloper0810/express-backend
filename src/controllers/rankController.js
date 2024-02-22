@@ -58,9 +58,9 @@ const rankStudentBySubject = async (students, subjectId) => {
 // @access  Public
 const rankSchool = async (req, res) => {
   try {
-    const mathSubject = await Subject.findOne({ subjectName: "Mathematics" });
+    const mathSubject = await Subject.findOne({ subjectName: "Matemática" });
     const math_id = mathSubject._id;
-    const portSubject = await Subject.findOne({ subjectName: "Portuguese" });
+    const portSubject = await Subject.findOne({ subjectName: "Português" });
     const port_id = portSubject._id;
 
     const schools = await School.find()
@@ -102,9 +102,9 @@ const rankSchool = async (req, res) => {
 const rankUser = async (req, res) => {
   try {
     // Find the school of the current user
-    const mathSubject = await Subject.findOne({ subjectName: "Mathematics" });
+    const mathSubject = await Subject.findOne({ subjectName: "Matemática" });
     const math_id = mathSubject._id;
-    const portSubject = await Subject.findOne({ subjectName: "Portuguese" });
+    const portSubject = await Subject.findOne({ subjectName: "Português" });
     const port_id = portSubject._id;
     const studentSchool = await School.findOne({
       students: req.user._id,
@@ -115,6 +115,7 @@ const rankUser = async (req, res) => {
       },
     });
     const students = studentSchool.students;
+    console.log(students);
 
     const mathRank = await rankStudentBySubject(students, math_id);
 
