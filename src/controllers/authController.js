@@ -25,63 +25,50 @@ const register = async (req, res) => {
         // errors.email = "Email already exists.";
         // don't proceed because the user exists
         return res.status(400).json({ msg: "Email already exists." });
-      } else {
-        const avatar = gravatar.url(email, {
-          s: "200",
-          r: "pg",
-          d: "mm",
-        });
-        // if user doesn't exist, create new User
-        const newUser = new User({
-          name: name,
-          email: email,
-          password: password,
-          avatar: avatar,
-          // school: school,
-          level: level,
-          role: role,
-        });
-        // bcrypt.genSalt(10, (err, salt) => {
-        //   bcrypt.hash(newUser.password, salt, (err, hash) => {
-        //     if (err) throw err;
-        //     newUser.password = hash;
-        newUser
-          .save()
-          .then((user) => {
-            if (user.role === "student") {
-              School.findOne({ schoolName: school })
-                .then((school) => {
-                  if (school) {
-                    school.students.push(user._id);
-                    user.school = school._id;
-                    user.save();
-                    school.save();
-                    // .then((school) =>
-                    //   res
-                    //     .status(200)
-                    //     .json({ success: true, data: { user, school } })
-                    // );
-                  } else {
-                    res
-                      .status(404)
-                      .json({ msg: "School not found(Register)." });
-                  }
-                })
-                .catch((err) =>
-                  res.status(400).json({
-                    msg: "User's School save error.",
-                    err: err.message,
-                  })
-                );
-            }
-            res.status(200).json({ success: true, data: { user } });
-          })
-          .catch((err) =>
-            res.status(500).json({ msg: "User save error.", err: err.message })
-          );
-        // });
-        // });
       }
+      const avatar = gravatar.url(email, {
+        s: "200",
+        r: "pg",
+        d: "mm",
+      });
+      // if user doesn't exist, create new User
+      const newUser = new User({
+        name: name,
+        email: email,
+        password: password,
+        avatar: avatar,
+        // school: school,
+        level: level,
+        role: role,
+      });
+
+      newUser
+        .save()
+        .then((user) => {
+          if (user.role === "student") {
+            School.findOne({ schoolName: school })
+              .then((school) => {
+                if (school) {
+                  school.students.push(user._id);
+                  user.school = school._id;
+                  user.save();
+                  school.save();
+                } else {
+                  return res.status(404).json({ msg: "School not found(Register)." });
+                }
+              })
+              .catch((err) =>
+                res.status(400).json({
+                  msg: "User's School save error.",
+                  err: err.message,
+                })
+              );
+          }
+          res.status(200).json({ success: true, data: { user } });
+        })
+        .catch((err) =>
+          res.status(500).json({ msg: "User save error.", err: err.message })
+        );
     });
   } catch (error) {
     res
@@ -154,7 +141,7 @@ const forgotPassword = async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (!user) {
-      res.status(404).json({ msg: "User not found." });
+      return res.status(404).json({ msg: "User not found." });
     }
     user.password = password;
     await user

@@ -32,22 +32,21 @@ const addSchool = async (req, res) => {
     await School.findOne({ schoolName: schoolName }).then((school) => {
       if (school) {
         return res.status(400).json({ msg: "School already exists." });
-      } else {
-        const newSchool = new School({
-          schoolName: schoolName,
-          description: description,
-        });
-        newSchool
-          .save()
-          .then(
-            () => res.status(200).json({ success: true, data: { newSchool } })
-          )
-          .catch((err) =>
-            res
-              .status(500)
-              .json({ msg: "New School save error.", err: err.message })
-          );
       }
+      const newSchool = new School({
+        schoolName: schoolName,
+        description: description,
+      });
+      newSchool
+        .save()
+        .then(() =>
+          res.status(200).json({ success: true, data: { newSchool } })
+        )
+        .catch((err) =>
+          res
+            .status(500)
+            .json({ msg: "New School save error.", err: err.message })
+        );
     });
   } catch (error) {
     res
@@ -65,14 +64,13 @@ const deleteSchool = async (req, res) => {
     await School.findByIdAndDelete(school_id).then((deleteSchool) => {
       if (!deleteSchool) {
         return res.status(400).json({ msg: "School not found." });
-      } else {
-        School.find().then((schools) => {
-          res.status(200).json({
-            success: true,
-            data: { schools },
-          });
-        });
       }
+      School.find().then((schools) => {
+        res.status(200).json({
+          success: true,
+          data: { schools },
+        });
+      });
     });
   } catch (error) {
     res

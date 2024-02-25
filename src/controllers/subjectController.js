@@ -39,25 +39,24 @@ const addSubject = async (req, res) => {
     const { subjectName } = req.body;
     Subject.findOne({ subjectName: subjectName }).then((subject) => {
       if (subject) {
-        res.status(400).json({ msg: "Subject already exists." });
-      } else {
-        const newSubject = new Subject({
-          subjectName: subjectName,
-        });
-        newSubject
-          .save()
-          .then(() =>
-            // Subject.find().then((subjects) => {
-            //   res.status(200).json({ success: true, data: { subjects } });
-            // })
-            res.status(200).json({ success: true, data: { newSubject } })
-          )
-          .catch((err) =>
-            res
-              .status(500)
-              .json({ msg: "New Subject save error.", err: err.message })
-          );
+        return res.status(400).json({ msg: "Subject already exists." });
       }
+      const newSubject = new Subject({
+        subjectName: subjectName,
+      });
+      newSubject
+        .save()
+        .then(() =>
+          // Subject.find().then((subjects) => {
+          //   res.status(200).json({ success: true, data: { subjects } });
+          // })
+          res.status(200).json({ success: true, data: { newSubject } })
+        )
+        .catch((err) =>
+          res
+            .status(500)
+            .json({ msg: "New Subject save error.", err: err.message })
+        );
     });
   } catch (error) {
     res
@@ -75,14 +74,13 @@ const deleteSubject = async (req, res) => {
     await Subject.findByIdAndDelete(subject_id).then((deleteSubject) => {
       if (!deleteSubject) {
         return res.status(400).json({ msg: "Subject not found." });
-      } else {
-        Subject.find().then((subjects) => {
-          res.status(200).json({
-            success: true,
-            data: { subjects },
-          });
-        });
       }
+      Subject.find().then((subjects) => {
+        res.status(200).json({
+          success: true,
+          data: { subjects },
+        });
+      });
     });
   } catch (error) {
     res
@@ -104,20 +102,18 @@ const addTopic = async (req, res) => {
           (subjectTopic) => subjectTopic === topic
         );
         if (sameTopic) {
-          res.status(400).json({ msg: "Topic already exists." });
-        } else {
-          if (!topic) {
-            res.status(400).json({ msg: "Topic is required." });
-          } else {
-            subject.topic.push(topic);
-            subject.save().then(() =>
-              // res.status(200).json({ success: true, data: { subject } })
-              Subject.find().then((subjects) =>
-                res.status(200).json({ success: true, data: { subjects } })
-              )
-            );
-          }
+          return res.status(400).json({ msg: "Topic already exists." });
         }
+        if (!topic) {
+          return res.status(400).json({ msg: "Topic is required." });
+        }
+        subject.topic.push(topic);
+        subject.save().then(() =>
+          // res.status(200).json({ success: true, data: { subject } })
+          Subject.find().then((subjects) =>
+            res.status(200).json({ success: true, data: { subjects } })
+          )
+        );
       })
       .catch((err) =>
         res.status(500).json({ msg: "Subject not found.", err: err.message })

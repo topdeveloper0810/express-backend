@@ -1,11 +1,8 @@
 const User = require("../models/User");
-const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const dotenv = require("dotenv");
 
 dotenv.config();
-
-const secretOrKey = process.env.JWT_ACCESS_TOKEN_SECRET_PRIVATE;
 
 const test = async (req, res) => {
   await res.status(200).json({ msg: "User is running" });

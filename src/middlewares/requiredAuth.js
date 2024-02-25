@@ -18,16 +18,15 @@ module.exports = async (req, res, next) => {
       jwt.verify(token, secretOrKey, (error, decoded) => {
         if (error) {
           return res.status(401).json({ msg: "Token is not valid." });
-        } else {
-          User.findById(decoded._id)
-            .then((user) => {
-              req.user = user;
-              next();
-            })
-            .catch(() => {
-              return res.status(401).json({ msg: "User token is not valid." });
-            });
         }
+        User.findById(decoded._id)
+          .then((user) => {
+            req.user = user;
+            next();
+          })
+          .catch(() => {
+            return res.status(401).json({ msg: "User token is not valid." });
+          });
       });
     }
   } catch (error) {

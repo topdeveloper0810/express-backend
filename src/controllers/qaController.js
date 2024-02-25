@@ -54,7 +54,7 @@ const updateQues = async (req, res) => {
     const { topic, question, subject, level } = req.body;
     const foundSubject = await Subject.findOne({ subjectName: subject });
     if (!foundSubject) {
-      res.status(404).json({ msg: "Subject not found." });
+      return res.status(404).json({ msg: "Subject not found." });
     }
     await Question.findByIdAndUpdate(updateques_id, {
       topic,
@@ -205,25 +205,23 @@ const addAns = async (req, res) => {
     const answer = await Answer.findOne({ question: ques_id, student: stu_id });
 
     if (answer) {
-      res.status(400).json({ msg: "Answer already exists." });
-    } else {
-      if (!answerText) {
-        res.status(400).json({ msg: "Answer is required." });
-      } else {
-        const newAnswer = new Answer({
-          student: stu_id,
-          question: ques_id,
-          answer: answerText,
-        });
-
-        await newAnswer.save();
-        question.answers.unshift(newAnswer._id);
-        await question.save();
-
-        res.status(200).json({ success: true, data: { newAnswer } });
-        Question.find()
-      }
+      return res.status(400).json({ msg: "Answer already exists." });
     }
+    if (!answerText) {
+      return res.status(400).json({ msg: "Answer is required." });
+    }
+    const newAnswer = new Answer({
+      student: stu_id,
+      question: ques_id,
+      answer: answerText,
+    });
+
+    await newAnswer.save();
+    question.answers.unshift(newAnswer._id);
+    await question.save();
+
+    res.status(200).json({ success: true, data: { newAnswer } });
+    Question.find();
   } catch (error) {
     res
       .status(500)
@@ -285,52 +283,47 @@ const trueAns = async (req, res) => {
     const answer = await Answer.findOne({ _id: ans_id, question: ques_id });
     if (answer) {
       if (answer.isCorrect) {
-        res.status(400).json({ msg: "This Answer already true." });
-      } else {
-        answer.isCorrect = true;
-        await answer.save();
-
-        const student = await User.findById(answer.student);
-        if (!student) {
-          res.status(404).json({ msg: "Student not found." });
-        } else {
-          const stuCorrect = student.correctQuestions.find(
-            (cq) => cq.subject.toString() === question.subject.toString()
-          );
-          const correctquestion = { question: ques_id };
-          if (!stuCorrect) {
-            student.correctQuestions.push({
-              subject: question.subject,
-              questions: [correctquestion],
-            });
-          } else {
-            stuCorrect.questions.push(correctquestion);
-          }
-          await student.save();
-        }
-
-        const school = await School.findById(student.school);
-        if (!school) {
-          return res.status(404).json({ msg: "School not found." });
-        } else {
-          const schoolCorrect = school.correctAnsNum.find(
-            (ca) => ca.subject.toString() === question.subject.toString()
-          );
-          if (!schoolCorrect) {
-            school.correctAnsNum.push({
-              subject: question.subject,
-              correctNum: 1,
-            });
-          } else {
-            schoolCorrect.correctNum += 1;
-          }
-          await school.save();
-        }
-
-        res
-          .status(200)
-          .json({ success: true, msg: "Answer marked as correct." });
+        return res.status(400).json({ msg: "This Answer already true." });
       }
+      answer.isCorrect = true;
+      await answer.save();
+
+      const student = await User.findById(answer.student);
+      if (!student) {
+        return res.status(404).json({ msg: "Student not found." });
+      }
+      const stuCorrect = student.correctQuestions.find(
+        (cq) => cq.subject.toString() === question.subject.toString()
+      );
+      const correctquestion = { question: ques_id };
+      if (!stuCorrect) {
+        student.correctQuestions.push({
+          subject: question.subject,
+          questions: [correctquestion],
+        });
+      } else {
+        stuCorrect.questions.push(correctquestion);
+      }
+      await student.save();
+
+      const school = await School.findById(student.school);
+      if (!school) {
+        return res.status(404).json({ msg: "School not found." });
+      }
+      const schoolCorrect = school.correctAnsNum.find(
+        (ca) => ca.subject.toString() === question.subject.toString()
+      );
+      if (!schoolCorrect) {
+        school.correctAnsNum.push({
+          subject: question.subject,
+          correctNum: 1,
+        });
+      } else {
+        schoolCorrect.correctNum += 1;
+      }
+      await school.save();
+
+      res.status(200).json({ success: true, msg: "Answer marked as correct." });
     } else {
       res.status(404).json({ msg: "Answer not found." });
     }

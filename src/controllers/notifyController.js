@@ -61,20 +61,18 @@ const adminDeleteNotify = async (req, res) => {
     const notify_id = req.params.notify_id;
     const deletedNotify = await Notify.findByIdAndDelete(notify_id);
     if (!deletedNotify) {
-      await res.status(404).json({ msg: "Notification not found." });
-    } else {
-      const users = await User.find({ notify: notify_id }).select("-password");
-      users.map(async (user) => {
-        const userNotifyIndex = await user.notify.indexOf(notify_id);
-        if (userNotifyIndex === -1) {
-          res.status(404).json({ msg: "User's notification not found." });
-        } else {
-          user.notify.splice(userNotifyIndex, 1);
-          user.save();
-        }
-      });
-      res.status(200).json({ success: true, data: { deletedNotify } });
+      return await res.status(404).json({ msg: "Notification not found." });
     }
+    const users = await User.find({ notify: notify_id }).select("-password");
+    users.map(async (user) => {
+      const userNotifyIndex = await user.notify.indexOf(notify_id);
+      if (userNotifyIndex === -1) {
+        return res.status(404).json({ msg: "User's notification not found." });
+      }
+      user.notify.splice(userNotifyIndex, 1);
+      user.save();
+    });
+    res.status(200).json({ success: true, data: { deletedNotify } });
   } catch (error) {
     res.status(500).json({
       msg: "Server error(Admin Delete Notify).",
@@ -92,10 +90,9 @@ const allNotifys = async (req, res) => {
       .populate("createdBy", ["name", "avatar"])
       .sort({ date: -1 });
     if (!allNotifys) {
-      res.status(404).json({ msg: "All Notifications not found." });
-    } else {
-      res.status(200).json({ success: true, data: { allNotifys } });
+      return res.status(404).json({ msg: "All Notifications not found." });
     }
+    res.status(200).json({ success: true, data: { allNotifys } });
   } catch (error) {
     res
       .status(500)
@@ -112,17 +109,15 @@ const stuDeleteNotify = async (req, res) => {
     const student_id = req.user._id;
     const student = await User.findById(student_id);
     if (!student) {
-      res.status(404).json({ msg: "User not found." });
-    } else {
-      const userNotifyIndex = await student.notify.indexOf(stunotify_id);
-      if (userNotifyIndex === -1) {
-        res.status(404).json({ msg: "User's notification not found." });
-      } else {
-        student.notify.splice(userNotifyIndex, 1);
-        await student.save();
-        res.status(200).json({ success: true, data: { student } });
-      }
+      return res.status(404).json({ msg: "User not found." });
     }
+    const userNotifyIndex = await student.notify.indexOf(stunotify_id);
+    if (userNotifyIndex === -1) {
+      return res.status(404).json({ msg: "User's notification not found." });
+    }
+    student.notify.splice(userNotifyIndex, 1);
+    await student.save();
+    res.status(200).json({ success: true, data: { student } });
   } catch (error) {
     res
       .status(500)
