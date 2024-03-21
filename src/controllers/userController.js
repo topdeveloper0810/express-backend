@@ -17,7 +17,11 @@ const me = async (req, res) => {
     await User.findById(user._id)
       .populate("school", "schoolName")
       .populate("notify")
-      .select("-password -correctQuestions -role -active")
+      .populate({
+        path: "correctQuestions",
+        populate: { path: "subject", select: "-_id subjectName" },
+      })
+      .select("-password -role -active")
       .then((user) => res.status(200).json({ success: true, data: { user } }))
       .catch((err) => res.status(404).json({ msg: "No user found." }));
   } catch (error) {
