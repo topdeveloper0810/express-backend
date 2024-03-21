@@ -12,7 +12,19 @@ const QuestionSchema = new Schema({
   },
   question: {
     type: String,
-    required: true,
+    required: [true, "Question is required!"],
+  },
+  type: {
+    type: String,
+    require: [true, "Type is required!"],
+    enum: ["multiple", "correct"],
+    default: "multiple",
+  },
+  list: {
+    type: Array,
+    require: () => {
+      return this.type === "multiple";
+    },
   },
   subject: {
     // type: String,

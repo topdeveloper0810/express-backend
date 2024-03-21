@@ -115,7 +115,7 @@ const rankUser = async (req, res) => {
       },
     });
     const students = studentSchool.students;
-    console.log(students);
+    // console.log(students);
 
     const mathRank = await rankStudentBySubject(students, math_id);
 

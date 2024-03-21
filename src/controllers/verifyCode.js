@@ -85,40 +85,42 @@ const sendCode = async (req, res) => {
 // @desc    Verify Code
 // @access  Public
 const verifyCode = async (req, res) => {
-  const token = req.headers.authorization.split(" ")[1];
-  const active = req.body.active;
-  if (!token) {
-    return res.status(401).json({ msg: "No verify token." });
-  }
   try {
-    await jwt.verify(token, secretOrKey, (error, decode) => {
-      if (error) {
-        return res.status(401).json({ msg: "Verify token is not valid." });
+    if (req.headers.authorization) {
+      const token = req.headers.authorization.split(" ")[1];
+      const active = req.body.active;
+      if (!token) {
+        return res.status(401).json({ msg: "No verify token." });
       }
-      User.findById(decode._id).then((user) => {
-        if (user.active == active) {
-          user.active = 1;
-          user
-            .save()
-            .then(() => {
-              res.status(200).json({
-                success: true,
-                active: user.active,
-                data: "Verify Passed.",
-              });
-            })
-            .catch((err) =>
-              res
-                .status(400)
-                .json({ msg: "active <= One error.", err: err.message })
-            );
-        } else {
-          res
-            .status(400)
-            .json({ active, msg: "The code is incorrect, try again" });
+      await jwt.verify(token, secretOrKey, (error, decode) => {
+        if (error) {
+          return res.status(401).json({ msg: "Verify token is not valid." });
         }
+        User.findById(decode._id).then((user) => {
+          if (user.active == active) {
+            user.active = 1;
+            user
+              .save()
+              .then(() => {
+                res.status(200).json({
+                  success: true,
+                  active: user.active,
+                  data: "Verify Passed.",
+                });
+              })
+              .catch((err) =>
+                res
+                  .status(400)
+                  .json({ msg: "active <= One error.", err: err.message })
+              );
+          } else {
+            res
+              .status(400)
+              .json({ active, msg: "The code is incorrect, try again" });
+          }
+        });
       });
-    });
+    }
   } catch (error) {
     res
       .status(500)

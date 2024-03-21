@@ -13,13 +13,15 @@ const test = async (req, res) => {
 // @access  Private
 const addQues = async (req, res) => {
   try {
-    const { topic, question, subject, level } = req.body;
+    const { topic, question, subject, level, type, list } = req.body;
     const newQuestion = new Question({
       createdBy: req.user._id,
       topic: topic,
       question: question,
       // subject: subject,
       level: level,
+      type: type,
+      list: list,
     });
     await Subject.findOne({ subjectName: subject })
       .then((subject) => {
@@ -51,7 +53,7 @@ const addQues = async (req, res) => {
 const updateQues = async (req, res) => {
   try {
     const updateques_id = req.params.updateques_id;
-    const { topic, question, subject, level } = req.body;
+    const { topic, question, subject, level, type, list } = req.body;
     const foundSubject = await Subject.findOne({ subjectName: subject });
     if (!foundSubject) {
       return res.status(404).json({ msg: "Subject not found." });
@@ -61,6 +63,8 @@ const updateQues = async (req, res) => {
       question,
       subject: foundSubject._id,
       level,
+      type,
+      list,
     });
     await Question.findById(updateques_id)
       .populate("subject", "subjectName")
@@ -198,8 +202,11 @@ const stuQues = async (req, res) => {
 const addAns = async (req, res) => {
   try {
     const stu_id = req.user._id;
+    console.log(stu_id)
     const ques_id = req.params.ques_id;
+    console.log(ques_id)
     const answerText = req.body.answer;
+    console.log(answerText)
 
     const question = await Question.findById(ques_id);
     const answer = await Answer.findOne({ question: ques_id, student: stu_id });

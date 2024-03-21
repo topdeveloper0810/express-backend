@@ -24,7 +24,7 @@ const register = async (req, res) => {
       if (user) {
         // errors.email = "Email already exists.";
         // don't proceed because the user exists
-        return res.status(400).json({ msg: "Email already exists." });
+        return res.status(400).json({ msg: "User already exists." });
       }
       const avatar = gravatar.url(email, {
         s: "200",
@@ -54,7 +54,9 @@ const register = async (req, res) => {
                   user.save();
                   school.save();
                 } else {
-                  return res.status(404).json({ msg: "School not found(Register)." });
+                  return res
+                    .status(404)
+                    .json({ msg: "School not found(Register)." });
                 }
               })
               .catch((err) =>
@@ -81,42 +83,45 @@ const register = async (req, res) => {
 // @desc    Login a user
 // @access  Public
 const login = async (req, res) => {
-  const { email, password } = req.body;
-
-  // find user by email
-  await User.findOne({ email })
-    .populate("school", "schoolName")
-    .then((user) => {
-      // check for user
-      if (!user) {
-        return res.status(400).json({ msg: "User not found." });
-      }
-      // check for password
-      bcrypt.compare(password, user.password).then((isMatch) => {
-        if (isMatch) {
-          // user matched
-          // create JWT payload
-          const payload = {
-            _id: user._id,
-            email: user.email,
-          };
-          // sign token
-          jwt.sign(
-            payload,
-            secretOrKey,
-            { expiresIn: expiresIn },
-            (err, token) => {
-              res.status(200).json({
-                success: true,
-                data: { user, token: "Bearer " + token },
-              });
-            }
-          );
-        } else {
-          return res.status(400).json({ msg: "Incorrect password entered." });
+  try {
+    const { email, password } = req.body;
+    // find user by email
+    await User.findOne({ email })
+      .populate("school", "schoolName")
+      .then((user) => {
+        // check for user
+        if (!user) {
+          return res.status(400).json({ msg: "User not found." });
         }
+        // check for password
+        bcrypt.compare(password, user.password).then((isMatch) => {
+          if (isMatch) {
+            // user matched
+            // create JWT payload
+            const payload = {
+              _id: user._id,
+              email: user.email,
+            };
+            // sign token
+            jwt.sign(
+              payload,
+              secretOrKey,
+              { expiresIn: expiresIn },
+              (err, token) => {
+                res.status(200).json({
+                  success: true,
+                  data: { user, token: "Bearer " + token },
+                });
+              }
+            );
+          } else {
+            return res.status(400).json({ msg: "Incorrect password entered." });
+          }
+        });
       });
-    });
+  } catch (error) {
+    res.status(500).json({ msg: "Server error(Login)", error: error.message });
+  }
 };
 
 // @route   POST api/v1/auth/logout
