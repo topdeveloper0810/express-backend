@@ -93,20 +93,20 @@ const deleteQues = async (req, res) => {
     const quesSubject = deletedQuestion.subject;
 
     const usersDeletedQuestion = await User.find({
-      "correctQuestions.subject": quesSubject,
+      "userAnswers.subject": quesSubject,
     });
 
     for (const user of usersDeletedQuestion) {
-      const cQs = user.correctQuestions;
+      const cQs = user.userAnswers;
       const cSQs = cQs.filter(
         (cQ) => cQ.subject.toString() === quesSubject.toString()
       );
-      const questions = cSQs[0].questions;
-      const index = questions.findIndex(
+      const correctquestions = cSQs[0].correctQuestions;
+      const correctindex = correctquestions.findIndex(
         (ques) => ques.question.toString() === deleteques_id.toString()
       );
-      if (index !== -1) {
-        questions.splice(index, 1);
+      if (correctindex !== -1) {
+        correctquestions.splice(correctindex, 1);
         await user.save();
 
         const school = await School.findById(user.school);
@@ -115,6 +115,14 @@ const deleteQues = async (req, res) => {
         );
         schoolCA.correctNum -= 1;
         await school.save();
+      }
+      const answerquestions = cSQs[0].answerQuestions;
+      const answerindex = answerquestions.findIndex(
+        (ques) => ques.question.toString() === deleteques_id.toString()
+      );
+      if (answerindex !== -1) {
+        answerquestions.splice(answerindex, 1);
+        await user.save();
       }
     }
 
@@ -202,11 +210,8 @@ const stuQues = async (req, res) => {
 const addAns = async (req, res) => {
   try {
     const stu_id = req.user._id;
-    console.log(stu_id)
     const ques_id = req.params.ques_id;
-    console.log(ques_id)
     const answerText = req.body.answer;
-    console.log(answerText)
 
     const question = await Question.findById(ques_id);
     const answer = await Answer.findOne({ question: ques_id, student: stu_id });
@@ -226,6 +231,24 @@ const addAns = async (req, res) => {
     await newAnswer.save();
     question.answers.unshift(newAnswer._id);
     await question.save();
+
+    const student = await User.findById(newAnswer.student);
+    if (!student) {
+      return res.status(404).json({ msg: "Student not found." });
+    }
+    const stuCorrect = student.userAnswers.find(
+      (cq) => cq.subject.toString() === question.subject.toString()
+    );
+    const answerquestion = { question: ques_id };
+    if (!stuCorrect) {
+      student.userAnswers.unshift({
+        subject: question.subject,
+        answerQuestions: [answerquestion],
+      });
+    } else {
+      stuCorrect.answerQuestions.unshift(answerquestion);
+    }
+    await student.save();
 
     res.status(200).json({ success: true, data: { newAnswer } });
     Question.find();
@@ -299,17 +322,17 @@ const trueAns = async (req, res) => {
       if (!student) {
         return res.status(404).json({ msg: "Student not found." });
       }
-      const stuCorrect = student.correctQuestions.find(
+      const stuCorrect = student.userAnswers.find(
         (cq) => cq.subject.toString() === question.subject.toString()
       );
       const correctquestion = { question: ques_id };
       if (!stuCorrect) {
-        student.correctQuestions.push({
+        student.userAnswers.unshift({
           subject: question.subject,
-          questions: [correctquestion],
+          correctQuestions: [correctquestion],
         });
       } else {
-        stuCorrect.questions.push(correctquestion);
+        stuCorrect.correctQuestions.unshift(correctquestion);
       }
       await student.save();
 

@@ -32,9 +32,9 @@ const rankStudentBySubject = async (students, subjectId) => {
   const rankedStudents = students.map((student) => {
     let score = 0;
 
-    student.correctQuestions.forEach((correctQues) => {
+    student.userAnswers.forEach((correctQues) => {
       if (correctQues.subject.toString() === subjectId.toString()) {
-        score += correctQues.questions.length;
+        score += correctQues.correctQuestions.length;
       }
     });
 
@@ -111,7 +111,7 @@ const rankUser = async (req, res) => {
     }).populate({
       path: "students",
       populate: {
-        path: "correctQuestions",
+        path: "userAnswers",
       },
     });
     const students = studentSchool.students;
@@ -124,8 +124,10 @@ const rankUser = async (req, res) => {
     const rankedStudents = students.map((student) => {
       let score = 0;
 
-      student.correctQuestions.forEach((correctQues) => {
-        score += correctQues.questions.length;
+      const answers = student.userAnswers
+
+      answers.forEach((answer) => {
+        score += answer.correctQuestions.length;
       });
 
       return {

@@ -38,13 +38,25 @@ const UserSchema = new Schema({
       return this.role === "student";
     },
   },
-  correctQuestions: [
+  userAnswers: [
     {
       subject: {
         type: Schema.Types.ObjectId,
         ref: "subjects",
       },
-      questions: [
+      correctQuestions: [
+        {
+          question: {
+            type: Schema.Types.ObjectId,
+            ref: "questions",
+          },
+          date: {
+            type: Date,
+            default: Date.now,
+          },
+        },
+      ],
+      answerQuestions: [
         {
           question: {
             type: Schema.Types.ObjectId,

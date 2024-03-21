@@ -18,7 +18,7 @@ const me = async (req, res) => {
       .populate("school", "schoolName")
       .populate("notify")
       .populate({
-        path: "correctQuestions",
+        path: "userAnswers",
         populate: { path: "subject", select: "-_id subjectName" },
       })
       .select("-password -role -active")
